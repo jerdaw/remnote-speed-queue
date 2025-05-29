@@ -9,109 +9,192 @@ import {
 } from '@remnote/plugin-sdk';
 import React from 'react';
 import {
-  autoAnswerDelayKey,
-  autoAnswerKey,
-  autoShowAnswerDelayKey,
-  autoShowAnswerKey,
-  defaultAlarmDelay,
-  defaultAutoAnswerDelay,
-  defaultAutoShowAnswerDelay,
-  playAlarmDelayKey,
-  playAlarmKey,
-} from '../lib/consts';
+  PLAY_ALARM_SOUND_KEY,
+  INITIAL_ALARM_DELAY_KEY,
+  AUTO_SHOW_ANSWER_KEY,
+  ADDITIVE_SHOW_ANSWER_DELAY_KEY,
+  AUTO_ANSWER_KEY,
+  ADDITIVE_AUTO_ANSWER_DELAY_KEY,
+  AUTO_ANSWER_ACTION_KEY,
+  CONTINUOUS_ALARM_KEY, 
+  CONTINUOUS_ALARM_INTERVAL_KEY, 
+
+  DEFAULT_INITIAL_ALARM_DELAY,
+  DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY,
+  DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY,
+  DEFAULT_AUTO_ANSWER_ACTION,
+  DEFAULT_CONTINUOUS_ALARM, 
+  DEFAULT_CONTINUOUS_ALARM_INTERVAL, 
+
+  BAR_COLOR_KEY,
+  DEFAULT_BAR_COLOR,
+} from '../lib/constants';
 import clsx from 'clsx';
 
 export function Bar() {
   const plugin = usePlugin();
   const [cardId, setCardId] = React.useState<string | null>(null);
-  useTracker(async () => {
-    const ctx = await plugin.widget.getWidgetContext<WidgetLocation.QueueBelowTopBar>();
+
+  useTracker(async (rp) => {
+    const ctx = await rp.widget.getWidgetContext<WidgetLocation.QueueBelowTopBar>();
     setCardId(ctx?.cardId || null);
   }, []);
 
-  useAPIEventListener(AppEvents.QueueCompleteCard, undefined, async (e) => {
+  useAPIEventListener(AppEvents.QueueCompleteCard, undefined, async () => {
     setTimeout(async () => {
       const ctx = await plugin.widget.getWidgetContext<WidgetLocation.QueueBelowTopBar>();
       setCardId(ctx?.cardId || null);
     }, 100);
   });
 
-  const playAlarmDelay =
-    useTracker(() => plugin.settings.getSetting<number>(playAlarmDelayKey), []) ||
-    defaultAlarmDelay;
-  const autoShowAnswer = useTracker(
-    () => plugin.settings.getSetting<boolean>(autoShowAnswerKey),
+  // --- Fetch Settings ---
+  const barColor = useTracker(
+    async (rp) => await rp.settings.getSetting<string>(BAR_COLOR_KEY),
+    []
+  ) || DEFAULT_BAR_COLOR;
+
+  const initialAlarmDelaySec = useTracker(
+    async (rp) => await rp.settings.getSetting<number>(INITIAL_ALARM_DELAY_KEY),
+    []
+  ) || DEFAULT_INITIAL_ALARM_DELAY;
+
+  const additiveShowAnswerDelaySec = useTracker(
+    async (rp) => await rp.settings.getSetting<number>(ADDITIVE_SHOW_ANSWER_DELAY_KEY),
+    []
+  ) || DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY;
+
+  const additiveAutoAnswerDelaySec = useTracker(
+    async (rp) => await rp.settings.getSetting<number>(ADDITIVE_AUTO_ANSWER_DELAY_KEY),
+    []
+  ) || DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY;
+
+  const autoShowAnswerEnabled = useTracker(
+    async (rp) => await rp.settings.getSetting<boolean>(AUTO_SHOW_ANSWER_KEY),
     []
   );
-  const autoShowAnswerDelay = useTracker(
-    async () =>
-      // Ensure autoShowAnswerDelay is at least playAlarmDelay + 1
-      Math.max(
-        (await plugin.settings.getSetting<number>(autoShowAnswerDelayKey)) ||
-          defaultAutoShowAnswerDelay,
-        playAlarmDelay + 1
-      ),
-    [playAlarmDelay]
-  )!;
-  const autoAnswer = useTracker(() => plugin.settings.getSetting<boolean>(autoAnswerKey), []);
-  const autoAnswerDelay = useTracker(
-    async () =>
-      // Ensure autoAnswerDelay is at least autoShowAnswerDelay + 1
-      Math.max(
-        (await plugin.settings.getSetting<number>(autoAnswerDelayKey)) || defaultAutoAnswerDelay,
-        autoShowAnswerDelay + 1
-      ),
-    [autoShowAnswerDelay]
-  )!;
+
+  const autoAnswerEnabled = useTracker(
+    async (rp) => await rp.settings.getSetting<boolean>(AUTO_ANSWER_KEY),
+    []
+  );
+
+  const autoAnswerAction = useTracker(
+    async (rp) => await rp.settings.getSetting<string>(AUTO_ANSWER_ACTION_KEY),
+    []
+  ) || DEFAULT_AUTO_ANSWER_ACTION;
+
+  const playAlarmSoundEnabled = useTracker(
+    async (rp) => await rp.settings.getSetting<boolean>(PLAY_ALARM_SOUND_KEY),
+    []
+  );
+
+  const continuousAlarmEnabled = useTracker(
+    async (rp) => await rp.settings.getSetting<boolean>(CONTINUOUS_ALARM_KEY),
+    []
+  ) ?? DEFAULT_CONTINUOUS_ALARM; 
+
+  const continuousAlarmIntervalSec = useTracker(
+    async (rp) => await rp.settings.getSetting<number>(CONTINUOUS_ALARM_INTERVAL_KEY),
+    []
+  ) || DEFAULT_CONTINUOUS_ALARM_INTERVAL;
+
+
+  // --- Calculate Effective Trigger Times in Milliseconds (Additive Logic) ---
+  const alarmTriggerTimeMs = initialAlarmDelaySec * 1000;
+  const showAnswerTriggerTimeMs = (initialAlarmDelaySec + additiveShowAnswerDelaySec) * 1000;
+  const autoAnswerTriggerTimeMs = (initialAlarmDelaySec + additiveShowAnswerDelaySec + additiveAutoAnswerDelaySec) * 1000;
 
   const audioRef = React.useRef<HTMLAudioElement>(null);
+  const continuousAlarmIntervalRef = React.useRef<NodeJS.Timeout | null>(null); 
+
+  const [isAnswerRevealedForCard, setIsAnswerRevealedForCard] = React.useState(false); 
+
+  const clearContinuousAlarm = () => {
+    if (continuousAlarmIntervalRef.current) {
+      clearInterval(continuousAlarmIntervalRef.current);
+      continuousAlarmIntervalRef.current = null;
+    }
+  };
 
   const playAlarm = async () => {
-    const shouldPlay = !!(await plugin.settings.getSetting(playAlarmKey));
-    if (audioRef.current && shouldPlay) {
+    if (playAlarmSoundEnabled && audioRef.current) {
       audioRef.current.play();
     }
   };
 
   const [startTime, setStartTime] = React.useState<number | null>(null);
-  const [playedAlarm, setPlayedAlarm] = React.useState(false);
-  const [showedAnswer, setShowedAnswer] = React.useState(false);
+  const [playedAlarm, setPlayedAlarm] = React.useState(false); 
   const [answered, setAnswered] = React.useState(false);
 
+
   React.useEffect(() => {
+    const actualContinuousIntervalMs = Math.max(1000, continuousAlarmIntervalSec * 1000); 
+
     const ivl = setInterval(async () => {
       const now = Date.now();
-      if (!cardId || (await plugin.queue.isTypeAnswerEnabled())) {
+      if (!cardId || !startTime || (await plugin.queue.isTypeAnswerEnabled())) {
         return;
-      } else if (!playedAlarm && startTime && now - startTime > playAlarmDelay * 1000) {
-        playAlarm();
+      }
+
+      const elapsedTime = now - startTime;
+
+      // 1. Play Initial Alarm & Start Continuous Alarm if enabled
+      if (!playedAlarm && elapsedTime > alarmTriggerTimeMs) {
+        playAlarm(); 
         setPlayedAlarm(true);
-      } else if (
-        !showedAnswer &&
-        autoShowAnswer &&
-        startTime &&
-        now - startTime > autoShowAnswerDelay * 1000
-      ) {
-        plugin.queue.showAnswer();
-        setShowedAnswer(true);
-      } else if (!answered && autoAnswer && startTime && now - startTime > autoAnswerDelay * 1000) {
-        plugin.queue.rateCurrentCard(QueueInteractionScore.AGAIN);
+
+        if (continuousAlarmEnabled && !isAnswerRevealedForCard) {
+          clearContinuousAlarm(); 
+          continuousAlarmIntervalRef.current = setInterval(() => {
+            if (!isAnswerRevealedForCard) { 
+                playAlarm();
+            } else {
+                clearContinuousAlarm(); 
+            }
+          }, actualContinuousIntervalMs);
+        }
+      }
+      
+      // 2. Auto Show Answer
+      if (!isAnswerRevealedForCard && autoShowAnswerEnabled && elapsedTime > showAnswerTriggerTimeMs) {
+        await plugin.queue.showAnswer();
+        setIsAnswerRevealedForCard(true); 
+        clearContinuousAlarm(); 
+      }
+
+      // 3. Auto Answer Card
+      if (!answered && autoAnswerEnabled && elapsedTime > autoAnswerTriggerTimeMs) {
+        if (autoAnswerAction === 'skip') {
+          await plugin.queue.removeCurrentCardFromQueue(false);
+          plugin.app.toast('Card Skipped.');
+        } else { 
+          await plugin.queue.rateCurrentCard(QueueInteractionScore.AGAIN);
+        }
         setAnswered(true);
+        clearContinuousAlarm(); 
       }
     }, 300);
+
     return () => {
       clearInterval(ivl);
+      clearContinuousAlarm(); 
     };
   }, [
     cardId,
     startTime,
-    playAlarmDelay,
-    autoShowAnswer,
-    autoShowAnswerDelay,
-    autoAnswer,
-    autoAnswerDelay,
+    alarmTriggerTimeMs,
+    showAnswerTriggerTimeMs,
+    autoAnswerTriggerTimeMs,
+    autoShowAnswerEnabled,
+    autoAnswerEnabled,
+    autoAnswerAction,
+    playAlarmSoundEnabled,
     playedAlarm,
-    showedAnswer,
+    isAnswerRevealedForCard, 
+    answered,
+    plugin,
+    continuousAlarmEnabled, 
+    continuousAlarmIntervalSec, 
   ]);
 
   React.useEffect(() => {
@@ -119,7 +202,8 @@ export function Bar() {
       setStartTime(Date.now());
       setAnswered(false);
       setPlayedAlarm(false);
-      setShowedAnswer(false);
+      setIsAnswerRevealedForCard(false); 
+      clearContinuousAlarm(); 
     }
   }, [cardId]);
 
@@ -133,12 +217,21 @@ export function Bar() {
     };
   }, []);
 
-  const width = Math.min(100, ((now - (startTime || now)) / (playAlarmDelay * 1000)) * 100);
+  const currentInitialAlarmDelayMs = initialAlarmDelaySec * 1000;
+  const width = Math.min(
+    100,
+    currentInitialAlarmDelayMs > 0 ? 
+      ((now - (startTime || now)) / currentInitialAlarmDelayMs) * 100 : 
+      (playedAlarm ? 100 : 0)
+  );
+
   return (
-    <div className="w-[100%] h-2">
+    <div className="w-[100%]">
       <div
-        className={clsx('h-2 bg-red-50', width === 100 && 'animate-pulse')}
+        className={clsx(width === 100 && currentInitialAlarmDelayMs > 0 && 'animate-pulse')}
         style={{
+          height: '1px',
+          backgroundColor: barColor,
           width: `${width}%`,
         }}
       ></div>
