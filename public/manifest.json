@@ -1,22 +1,22 @@
 {
   "manifestVersion": 1,
-  "id": "remnote-speed-mode",
-  "name": "Queue Speed Mode",
-  "author": "Jamesb",
-  "repoUrl": "https://github.com/bjsi/remnote-speed-mode",
+  "id": "jerdaw-enhanced-speed-queue",
+  "name": "Enhanced Speed Queue",
+  "author": "jerdaw",
+  "repoUrl": "https://github.com/jerdaw/remnote-speed-queue",
   "version": {
     "major": 0,
-    "minor": 0,
-    "patch": 4
+    "minor": 1,
+    "patch": 0
   },
   "theme": [],
   "enableOnMobile": true,
-  "description": "Sets time limits to helps you focus on your flashcard reviews.",
+  "description": "An enhanced speed-focused flashcard queue with configurable timers, colors, continuous alarms, and flexible auto-answer options.",
   "requestNative": true,
   "requiredScopes": [
     {
       "type": "All",
-      "level": "Read"
+      "level": "ReadCreateModifyDelete"
     }
   ]
 }
