@@ -1,6 +1,6 @@
 # Enhanced Speed Queue (for RemNote)
 
-A plugin by **jerdaw** to supercharge your RemNote flashcard review speed and focus. This plugin builds upon the original "Queue Speed Mode" by Jamesb.
+A plugin by to supercharge your RemNote flashcard review speed and focus. This plugin builds upon the original "Queue Speed Mode" by **Jamesb**.
 
 ## Planned Features (Work in Progress)
 
