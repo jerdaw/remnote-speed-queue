@@ -1,78 +1,79 @@
 import { useState, useEffect } from 'react';
 import { usePlugin } from '@remnote/plugin-sdk';
 import type { RichTextInterface } from '@remnote/plugin-sdk';
-import { QueueSettings } from './useQueueSettings';
-import { WORDS_PER_MINUTE } from '../constants';
+import {
+  WORDS_PER_MINUTE,
+  AUTO_DETECT_MIN_SEC,
+  AUTO_DETECT_MAX_SEC,
+  DEFAULT_MANUAL_FALLBACK_DELAY,
+} from '../constants';
 
 const COMPONENT_NAME = "EnhancedSpeedQueueBar";
 
+/**
+ * Always auto-detects delay based on card content length and reading speed.
+ * Falls back to DEFAULT_MANUAL_FALLBACK_DELAY if card text can't be parsed.
+ */
 export function useAutoDetectDelay(
   cardId: string | null,
-  settings: QueueSettings['delay']
+  readingSpeed: number
 ): number {
   const plugin = usePlugin();
-  const [currentInitialAlarmDelaySec, setCurrentInitialAlarmDelaySec] = useState(settings.manualInitialAlarmDelaySec);
+  const [currentDelaySec, setCurrentDelaySec] = useState(DEFAULT_MANUAL_FALLBACK_DELAY);
 
   useEffect(() => {
-    const calculateAndSetDelay = async () => {
+    const calculateDelay = async () => {
       if (!cardId) {
-        setCurrentInitialAlarmDelaySec(settings.manualInitialAlarmDelaySec); 
+        setCurrentDelaySec(DEFAULT_MANUAL_FALLBACK_DELAY);
         return;
       }
 
-      if (settings.enableAutoDetectDelay) {
-        try {
-          const currentCardObject = await plugin.queue.getCurrentCard(); 
-          let frontRichText: RichTextInterface | undefined = undefined;
-          let backRichText: RichTextInterface | undefined = undefined;
+      try {
+        const currentCardObject = await plugin.queue.getCurrentCard();
+        let frontRichText: RichTextInterface | undefined = undefined;
+        let backRichText: RichTextInterface | undefined = undefined;
 
-          if (currentCardObject) {
-            const associatedRem = await currentCardObject.getRem();
-            if (associatedRem) {
-              frontRichText = associatedRem.text;
-              if (settings.includeAnswerInAutoDetect) {
-                backRichText = associatedRem.backText;
-              }
-            }
+        if (currentCardObject) {
+          const associatedRem = await currentCardObject.getRem();
+          if (associatedRem) {
+            frontRichText = associatedRem.text;
+            backRichText = associatedRem.backText; // always include answer
           }
-          
-          let plainText = '';
-          if (frontRichText) {
-            plainText += await plugin.richText.toString(frontRichText);
-          }
-          if (backRichText) {
-            plainText += ' ' + await plugin.richText.toString(backRichText);
-          }
-          
-          if (plainText.trim()) {
-            const words = plainText.split(/\s+/).filter(Boolean); 
-            const wordCount = words.length;
-            
-            if (wordCount > 0) {
-              const baseCalculatedDelay = (wordCount / WORDS_PER_MINUTE) * 60;
-              const multipliedDelay = baseCalculatedDelay * settings.autoDetectDelayMultiplierSetting;
-              const clampedDelay = Math.max(settings.minAutoDetectLimitSec, Math.min(settings.maxAutoDetectLimitSec, multipliedDelay));
-              
-              console.log(`[${COMPONENT_NAME}] AutoDetect Results for ${cardId}: Words=${wordCount}, BaseCalc=${baseCalculatedDelay.toFixed(2)}s, Multiplier=${settings.autoDetectDelayMultiplierSetting.toFixed(1)}x, Final Clamped Delay=${Math.round(clampedDelay)}s`);
-
-              setCurrentInitialAlarmDelaySec(Math.round(clampedDelay));
-            } else {
-              setCurrentInitialAlarmDelaySec(settings.manualInitialAlarmDelaySec);
-            }
-          } else {
-            setCurrentInitialAlarmDelaySec(settings.manualInitialAlarmDelaySec);
-          }
-        } catch (error) {
-          console.error(`[${COMPONENT_NAME}] Error auto-detecting delay:`, error);
-          setCurrentInitialAlarmDelaySec(settings.manualInitialAlarmDelaySec); 
         }
-      } else {
-        setCurrentInitialAlarmDelaySec(settings.manualInitialAlarmDelaySec);
+
+        let plainText = '';
+        if (frontRichText) {
+          plainText += await plugin.richText.toString(frontRichText);
+        }
+        if (backRichText) {
+          plainText += ' ' + await plugin.richText.toString(backRichText);
+        }
+
+        if (plainText.trim()) {
+          const words = plainText.split(/\s+/).filter(Boolean);
+          const wordCount = words.length;
+
+          if (wordCount > 0) {
+            const baseDelay = (wordCount / WORDS_PER_MINUTE) * 60;
+            const scaledDelay = baseDelay * readingSpeed;
+            const clampedDelay = Math.max(AUTO_DETECT_MIN_SEC, Math.min(AUTO_DETECT_MAX_SEC, scaledDelay));
+
+            console.log(`[${COMPONENT_NAME}] AutoDetect: ${cardId} — ${wordCount} words, ${readingSpeed}x speed → ${Math.round(clampedDelay)}s`);
+            setCurrentDelaySec(Math.round(clampedDelay));
+          } else {
+            setCurrentDelaySec(DEFAULT_MANUAL_FALLBACK_DELAY);
+          }
+        } else {
+          setCurrentDelaySec(DEFAULT_MANUAL_FALLBACK_DELAY);
+        }
+      } catch (error) {
+        console.error(`[${COMPONENT_NAME}] Error auto-detecting delay:`, error);
+        setCurrentDelaySec(DEFAULT_MANUAL_FALLBACK_DELAY);
       }
     };
 
-    calculateAndSetDelay();
-  }, [cardId, settings.enableAutoDetectDelay, settings.includeAnswerInAutoDetect, settings.manualInitialAlarmDelaySec, settings.autoDetectDelayMultiplierSetting, settings.minAutoDetectLimitSec, settings.maxAutoDetectLimitSec, plugin]);
+    calculateDelay();
+  }, [cardId, readingSpeed, plugin]);
 
-  return currentInitialAlarmDelaySec;
+  return currentDelaySec;
 }

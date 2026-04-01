@@ -1,5 +1,6 @@
 import { useRef, useCallback } from 'react';
 import { QueueSettings } from './useQueueSettings';
+import { ALARM_VOLUME_MAP } from '../constants';
 
 export function useAlarmAudio(settings: QueueSettings['alarm']) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -13,18 +14,10 @@ export function useAlarmAudio(settings: QueueSettings['alarm']) {
   }, []);
 
   const playAlarm = useCallback(async () => {
-    if (!settings.playAlarmSoundEnabled || !audioRef.current) return;
-    
-    const volumeLevels: Record<number, number> = {
-      0: 0.0,
-      33: 0.2,
-      66: 0.5,
-      100: 1.0,
-    };
-    
-    // Find closest volume preset or calculate exact fraction
-    const rawVolume = settings.alarmVolumeSetting;
-    audioRef.current.volume = volumeLevels[rawVolume as keyof typeof volumeLevels] ?? (Math.max(0, Math.min(100, rawVolume)) / 100);
+    if (settings.volume === 'off' || !audioRef.current) return;
+
+    const volumeLevel = ALARM_VOLUME_MAP[settings.volume] ?? ALARM_VOLUME_MAP['medium'];
+    audioRef.current.volume = volumeLevel;
 
     try {
       audioRef.current.currentTime = 0;
@@ -32,7 +25,7 @@ export function useAlarmAudio(settings: QueueSettings['alarm']) {
     } catch (error) {
       console.warn("EnhancedSpeedQueue: Failed to play alarm audio. This is normal if the user hasn't interacted with the page yet.", error);
     }
-  }, [settings.playAlarmSoundEnabled, settings.alarmVolumeSetting]);
+  }, [settings.volume]);
 
   return {
     audioRef,

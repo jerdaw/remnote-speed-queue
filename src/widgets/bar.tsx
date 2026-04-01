@@ -12,18 +12,18 @@ export function Bar() {
   const plugin = usePlugin();
   const settings = useQueueSettings();
   const { cardId } = useCardTracker();
-  const alarmDelaySec = useAutoDetectDelay(cardId, settings.delay);
+  const alarmDelaySec = useAutoDetectDelay(cardId, settings.timer.readingSpeed);
   const { audioRef, playAlarm, clearContinuousAlarm, continuousAlarmIntervalRef } = useAlarmAudio(settings.alarm);
   const { startTime } = useTimerStateMachine(
     cardId,
     alarmDelaySec,
-    { ...settings.auto, ...settings.alarm },
+    { alarm: settings.alarm, auto: settings.auto },
     playAlarm,
     clearContinuousAlarm,
     continuousAlarmIntervalRef
   );
 
-  // Progress bar animation
+  // Progress bar animation (rAF-based)
   const nowRef = React.useRef(Date.now());
   const [, forceUpdate] = React.useReducer((x) => x + 1, 0);
 
@@ -38,12 +38,12 @@ export function Bar() {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
-  const currentInitialAlarmDelayMsForBar = alarmDelaySec * 1000;
-  
+  const alarmDelayMs = alarmDelaySec * 1000;
+
   const width = Math.min(
     100,
-    currentInitialAlarmDelayMsForBar > 0 && startTime 
-      ? ((nowRef.current - startTime) / currentInitialAlarmDelayMsForBar) * 100 
+    alarmDelayMs > 0 && startTime
+      ? ((nowRef.current - startTime) / alarmDelayMs) * 100
       : 0
   );
 
@@ -51,10 +51,11 @@ export function Bar() {
     <div className="w-[100%]">
       {settings.display.enableProgressBar && (
         <div
-          className={clsx(width === 100 && currentInitialAlarmDelayMsForBar > 0 && 'animate-pulse')}
+          className={clsx(width === 100 && alarmDelayMs > 0 && 'animate-pulse')}
           style={{
             height: '1px',
-            backgroundColor: settings.display.barColor || 'transparent',
+            backgroundColor: 'currentColor',
+            opacity: 0.4,
             width: `${width}%`,
           }}
         ></div>

@@ -1,67 +1,46 @@
 # Enhanced Speed Queue (for RemNote)
 
-A plugin by **jerdaw** to supercharge your RemNote flashcard review speed and focus with highly configurable timers and automation. This plugin is built upon and significantly extends the original "Queue Speed Mode" plugin by **Jamesb**.
+A plugin by **jerdaw** to supercharge your RemNote flashcard review speed and focus with adaptive timers and automation. Built upon and significantly extending the original "Queue Speed Mode" plugin by **Jamesb**.
 
-## Features
+## How It Works
 
-This plugin provides a suite of tools to help you maintain a quick and focused pace during your flashcard reviews.
+The plugin automatically calculates how long you need to read each flashcard based on its word count, then:
 
--   **Dynamic Initial Timer:**
-    -   **Auto-Detect Delay:** Automatically calculates an appropriate time limit based on the length of your card's content (front and optionally back).
-    -   **Reading Time Multiplier:** Speed up or slow down the auto-detected time with a configurable multiplier (e.g., 0.5x for faster, 2.0x for slower).
-    -   **Min/Max Safeguards:** Set minimum and maximum time limits to ensure auto-detected delays always fall within a reasonable range.
-    -   **Manual Fallback:** A manual timer can be used if you prefer a fixed delay for all cards or if content analysis fails.
+1. **⏱️ Timer** — A progress bar fills as you read. When time's up, an alarm sounds.
+2. **⚡ Auto-Show** — The answer is revealed automatically after a short delay.
+3. **🔁 Auto-Answer** — The card is rated (Again) or skipped, and the next card appears.
 
--   **Customizable Alarms:**
-    -   **Volume Control:** Adjust the alarm sound's volume from 0 to 100.
-    -   **Repeating Alarm:** Optionally set the alarm to repeat at a custom interval. The alarm will continue until you move to the next card, even after the answer is revealed.
-
--   **Flexible Automation:**
-    -   **Auto-Show Answer:** Automatically reveal the answer after a set additive delay passes the initial alarm time.
-    -   **Auto-Answer Card:** Automatically rate the card after the answer has been shown for a set duration.
-    -   **Configurable Auto-Answer Action:** Choose whether the plugin automatically rates cards as **"Forgotten/Again"** or **"Skip Card"**, removing it from the current session.
-
--   **Minimalist Visual Cue:**
-    -   A sleek, **1px tall progress bar** visually represents the initial timer.
-    -   The color of the progress bar is fully customizable.
-    -   The bar can be completely hidden for an even cleaner interface.
+All three stages are configurable. Out of the box, the plugin runs fully hands-free with sensible defaults.
 
 ## Known Limitations
 
-- **Mobile Audio:** iOS and some Android browsers block programmatic audio playback without a preceding user gesture. The alarm sound may not play on mobile devices regardless of settings. All other features (progress bar, auto-show, auto-answer) work normally on mobile.
-## Settings Guide
+- **Mobile Audio:** iOS and some Android browsers block programmatic audio playback without a preceding user gesture. The alarm sound may not play on mobile devices. All other features work normally on mobile.
 
-All features can be configured in RemNote via `Settings > Plugins > Enhanced Speed Queue`.
+## Settings
 
----
-### General Display Settings
-* **Enable Progress Bar:** Show or hide the 1px timer progress bar.
-* **Progress Bar Color:** Set a custom HTML color code for the progress bar (e.g., `#A9A9A9`, `lightblue`).
+All settings are in `Settings > Plugins > Enhanced Speed Queue`.
 
----
-### Initial Alarm Settings
-* **Play Alarm Sound:** Toggle the alarm sound on or off.
-* **Alarm Volume (0-100):** Adjust the loudness of the alarm sound.
-* **Auto-Detect Initial Alarm Delay:** Enable to automatically set the timer based on card length. If disabled, the "Manual Initial Alarm Delay" is used.
-* **Include Answer in Auto-Detect:** If auto-detect is on, this includes the answer text in the reading time calculation.
-* **Auto-Detect Delay Multiplier:** Scales the auto-calculated time (e.g., `0.8` for 80% of the calculated time, `1.5` for 150%).
-* **Min/Max Auto-Detected Delay (sec):** Sets the floor and ceiling for the auto-detected timer to ensure it's never too short or too long.
-* **Manual Initial Alarm Delay (sec):** The fixed timer delay used when auto-detect is disabled.
+### Timer
+| Setting | Description | Default |
+|---|---|---|
+| **Reading Speed** | How fast you read. Lower = less time per card, higher = more. Range 0.1x–10x. | 1.0 |
 
----
-### Repeating Alarm
-* **Enable Repeating Alarm:** If enabled, the alarm will repeat after its initial trigger.
-* **Repeating Alarm Interval (sec):** Sets how often the alarm repeats.
+### Alarm
+| Setting | Description | Default |
+|---|---|---|
+| **Alarm Volume** | Off / Low / Medium / High. "Off" disables sound entirely. | Medium |
+| **Repeat Alarm Every (sec)** | How often the alarm repeats after the initial trigger. 0 = no repeat. | 0 |
 
----
-### Auto Show Answer Settings
-* **Enable Auto Show Answer:** Toggle to automatically reveal the card's answer.
-* **Show Answer Delay (after alarm, sec):** The additional time *after* the initial alarm sounds before the answer is shown.
+### Automation
+| Setting | Description | Default |
+|---|---|---|
+| **Auto Show Answer** | Automatically reveal the answer after the alarm. | ✅ On |
+| **Show Answer Delay** | Seconds after the alarm before the answer is shown. | 3 |
+| **Auto Answer Card** | Automatically rate the card after the answer is shown. | ✅ On |
+| **Auto-Answer Action** | Forgotten/Again or Skip (remove from session). | Again |
+| **Auto-Answer Delay** | Seconds after the answer is shown before auto-answer triggers. | 2 |
 
----
-### Auto Answer Card Settings
-* **Enable Auto Answer Card:** Toggle to automatically rate the card and move to the next one.
-* **Auto-Answer Action:** Choose the automatic rating:
-    * **Forgotten/Again:** Rates the card as forgotten (standard SRS behavior for failed recall).
-    * **Skip Card:** Removes the card from the current review session without rating it.
-* **Auto-Answer Delay (after answer shown, sec):** The additional time *after* the answer is revealed before the auto-answer action is triggered.
+### Display
+| Setting | Description | Default |
+|---|---|---|
+| **Show Progress Bar** | Show or hide the 1px timer bar above the card. | ✅ On |

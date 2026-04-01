@@ -6,7 +6,10 @@ import { useSessionStats } from './useSessionStats';
 export function useTimerStateMachine(
   cardId: string | null,
   alarmDelaySec: number,
-  settings: QueueSettings['auto'] & QueueSettings['alarm'],
+  settings: {
+    alarm: QueueSettings['alarm'];
+    auto: QueueSettings['auto'];
+  },
   playAlarm: () => Promise<void>,
   clearContinuousAlarm: () => void,
   continuousAlarmIntervalRef: React.MutableRefObject<NodeJS.Timeout | null>
@@ -42,21 +45,21 @@ export function useTimerStateMachine(
 
     const timers: ReturnType<typeof setTimeout>[] = [];
     const alarmTriggerTimeMs = alarmDelaySec * 1000;
-    const showAnswerTriggerTimeMs = (alarmDelaySec + settings.additiveShowAnswerDelaySec) * 1000;
-    const autoAnswerTriggerTimeMs = (alarmDelaySec + settings.additiveShowAnswerDelaySec + settings.additiveAutoAnswerDelaySec) * 1000;
+    const showAnswerTriggerTimeMs = (alarmDelaySec + settings.auto.additiveShowAnswerDelaySec) * 1000;
+    const autoAnswerTriggerTimeMs = (alarmDelaySec + settings.auto.additiveShowAnswerDelaySec + settings.auto.additiveAutoAnswerDelaySec) * 1000;
 
     // Timer 1: Initial alarm
     const alarmDelay = Math.max(0, alarmTriggerTimeMs - (Date.now() - startTime));
     timers.push(setTimeout(async () => {
       await playAlarm();
-      if (settings.continuousAlarmEnabled) {
-        const repeatMs = Math.max(1000, settings.continuousAlarmIntervalSec * 1000);
+      if (settings.alarm.repeatIntervalSec > 0) {
+        const repeatMs = Math.max(1000, settings.alarm.repeatIntervalSec * 1000);
         continuousAlarmIntervalRef.current = setInterval(() => playAlarm(), repeatMs);
       }
     }, alarmDelay));
 
     // Timer 2: Auto Show Answer
-    if (settings.autoShowAnswerEnabled) {
+    if (settings.auto.autoShowAnswerEnabled) {
       const showDelay = Math.max(0, showAnswerTriggerTimeMs - (Date.now() - startTime));
       timers.push(setTimeout(async () => {
         await plugin.queue.showAnswer();
@@ -64,10 +67,10 @@ export function useTimerStateMachine(
     }
 
     // Timer 3: Auto Answer
-    if (settings.autoAnswerEnabled) {
+    if (settings.auto.autoAnswerEnabled) {
       const answerDelay = Math.max(0, autoAnswerTriggerTimeMs - (Date.now() - startTime));
       timers.push(setTimeout(async () => {
-        if (settings.autoAnswerAction === 'skip') {
+        if (settings.auto.autoAnswerAction === 'skip') {
           await plugin.queue.removeCurrentCardFromQueue(false);
           plugin.app.toast('Card Skipped.');
           setSkippedCount(skippedCountRef.current + 1);
@@ -84,9 +87,9 @@ export function useTimerStateMachine(
     };
   }, [
     cardId, startTime, alarmDelaySec,
-    settings.autoShowAnswerEnabled, settings.additiveShowAnswerDelaySec,
-    settings.autoAnswerEnabled, settings.additiveAutoAnswerDelaySec, settings.autoAnswerAction,
-    settings.continuousAlarmEnabled, settings.continuousAlarmIntervalSec,
+    settings.auto.autoShowAnswerEnabled, settings.auto.additiveShowAnswerDelaySec,
+    settings.auto.autoAnswerEnabled, settings.auto.additiveAutoAnswerDelaySec, settings.auto.autoAnswerAction,
+    settings.alarm.repeatIntervalSec,
     playAlarm, clearContinuousAlarm, continuousAlarmIntervalRef, plugin,
     setSkippedCount, setAutoAnsweredCount
     // Note: *CountRef refs are intentionally excluded — they're updated via separate useEffects
