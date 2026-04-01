@@ -182,6 +182,6 @@ async function onActivate(plugin: ReactRNPlugin) {
   });
 }
 
+// onDeactivate: sandboxed plugins auto-clean event listeners; nothing to do here.
 async function onDeactivate(_: ReactRNPlugin) {}
-
 declareIndexPlugin(onActivate, onDeactivate);

@@ -26,6 +26,9 @@ This plugin provides a suite of tools to help you maintain a quick and focused p
     -   The color of the progress bar is fully customizable.
     -   The bar can be completely hidden for an even cleaner interface.
 
+## Known Limitations
+
+- **Mobile Audio:** iOS and some Android browsers block programmatic audio playback without a preceding user gesture. The alarm sound may not play on mobile devices regardless of settings. All other features (progress bar, auto-show, auto-answer) work normally on mobile.
 ## Settings Guide
 
 All features can be configured in RemNote via `Settings > Plugins > Enhanced Speed Queue`.

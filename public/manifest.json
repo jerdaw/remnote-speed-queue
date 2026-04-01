@@ -4,6 +4,9 @@
   "name": "Enhanced Speed Queue",
   "author": "jerdaw",
   "repoUrl": "https://github.com/jerdaw/remnote-speed-queue",
+  "projectUrl": "https://github.com/jerdaw/remnote-speed-queue",
+  "supportUrl": "https://github.com/jerdaw/remnote-speed-queue/issues",
+  "changelogUrl": "https://github.com/jerdaw/remnote-speed-queue/blob/main/CHANGELOG.md",
   "version": {
     "major": 0,
     "minor": 1,
@@ -12,11 +15,11 @@
   "theme": [],
   "enableOnMobile": true,
   "description": "An enhanced speed-focused flashcard queue with configurable timers, colors, continuous alarms, and flexible auto-answer options.",
-  "requestNative": true,
+  "requestNative": false,
   "requiredScopes": [
     {
       "type": "All",
-      "level": "ReadCreateModifyDelete"
+      "level": "Read"
     }
   ]
 }
