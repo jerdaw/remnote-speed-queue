@@ -4,8 +4,9 @@
 export const ENABLE_PROGRESS_BAR_KEY = 'enableProgressBar';
 
 // --- Timer ---
+export const TIMER_MODE_KEY = 'timerMode'; // legacy read-only key for backward compatibility
 export const READING_SPEED_KEY = 'autoDetectDelayMultiplier'; // keep same storage key for backward compat
-export const INITIAL_ALARM_DELAY_KEY = 'initialAlarmDelay'; // kept for storage compat, now hidden fallback
+export const INITIAL_ALARM_DELAY_KEY = 'initialAlarmDelay'; // 0 = auto, >0 = manual override
 
 // --- Alarm ---
 export const ALARM_VOLUME_KEY = 'alarmVolume';
@@ -27,6 +28,7 @@ export const DEFAULT_ENABLE_PROGRESS_BAR = true;
 export const DEFAULT_READING_SPEED = 1.0;
 export const MIN_READING_SPEED = 0.1;
 export const MAX_READING_SPEED = 10.0;
+export const DEFAULT_INITIAL_ALARM_DELAY = 0; // seconds; 0 = auto
 export const DEFAULT_MANUAL_FALLBACK_DELAY = 7; // seconds — hardcoded fallback when card text can't be parsed
 
 // --- Auto-Detect Hardcoded Bounds ---

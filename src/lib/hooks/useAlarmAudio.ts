@@ -3,36 +3,153 @@ import { usePlugin } from '@remnote/plugin-sdk';
 import { QueueSettings } from './useQueueSettings';
 import { ALARM_VOLUME_MAP } from '../constants';
 
+type SharedAlarmAudioState = {
+  src: string | null;
+  context: AudioContext | null;
+  gainNode: GainNode | null;
+  buffer: AudioBuffer | null;
+  loadingPromise: Promise<AudioBuffer | null> | null;
+  unlockListenersAttached: boolean;
+};
+
+let sharedAlarmAudioState: SharedAlarmAudioState = {
+  src: null,
+  context: null,
+  gainNode: null,
+  buffer: null,
+  loadingPromise: null,
+  unlockListenersAttached: false,
+};
+
+function getAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+
+  const AudioContextCtor = window.AudioContext
+    ?? (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+
+  if (!AudioContextCtor) return null;
+
+  if (!sharedAlarmAudioState.context) {
+    sharedAlarmAudioState.context = new AudioContextCtor();
+    sharedAlarmAudioState.gainNode = sharedAlarmAudioState.context.createGain();
+    sharedAlarmAudioState.gainNode.connect(sharedAlarmAudioState.context.destination);
+  }
+
+  return sharedAlarmAudioState.context;
+}
+
+async function loadAlarmBuffer(src?: string): Promise<AudioBuffer | null> {
+  if (!src) return null;
+
+  const context = getAudioContext();
+  if (!context) return null;
+
+  if (sharedAlarmAudioState.src === src && sharedAlarmAudioState.buffer) {
+    return sharedAlarmAudioState.buffer;
+  }
+
+  if (sharedAlarmAudioState.src === src && sharedAlarmAudioState.loadingPromise) {
+    return sharedAlarmAudioState.loadingPromise;
+  }
+
+  sharedAlarmAudioState.src = src;
+  sharedAlarmAudioState.buffer = null;
+  sharedAlarmAudioState.loadingPromise = (async () => {
+    const response = await fetch(src);
+    const arrayBuffer = await response.arrayBuffer();
+    const decodedBuffer = await context.decodeAudioData(arrayBuffer.slice(0));
+    sharedAlarmAudioState.buffer = decodedBuffer;
+    return decodedBuffer;
+  })().catch((error) => {
+    console.warn('EnhancedSpeedQueue: Failed to preload alarm audio buffer.', error);
+    return null;
+  }).finally(() => {
+    sharedAlarmAudioState.loadingPromise = null;
+  });
+
+  return sharedAlarmAudioState.loadingPromise;
+}
+
+async function unlockAlarmAudioContext() {
+  const context = getAudioContext();
+  if (!context) return;
+
+  if (context.state !== 'running') {
+    try {
+      await context.resume();
+    } catch (error) {
+      console.warn('EnhancedSpeedQueue: Failed to resume audio context.', error);
+    }
+  }
+}
+
+function attachUnlockListeners() {
+  if (typeof window === 'undefined' || sharedAlarmAudioState.unlockListenersAttached) return;
+
+  const handler = () => {
+    void unlockAlarmAudioContext();
+  };
+
+  const options: AddEventListenerOptions = { capture: true };
+
+  window.addEventListener('keydown', handler, options);
+  window.addEventListener('mousedown', handler, options);
+  window.addEventListener('pointerdown', handler, options);
+  window.addEventListener('touchstart', handler, options);
+  sharedAlarmAudioState.unlockListenersAttached = true;
+}
+
+export interface AlarmPlaybackResult {
+  played: boolean;
+  reason: 'played' | 'disabled' | 'unsupported' | 'blocked' | 'failed';
+}
+
 export function useAlarmAudio(settings: QueueSettings['alarm']) {
   const plugin = usePlugin();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const continuousAlarmIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioSrc = plugin.rootURL ? `${plugin.rootURL}ding.mp3` : undefined;
 
-  const clearContinuousAlarm = useCallback(() => {
-    if (continuousAlarmIntervalRef.current) {
-      clearInterval(continuousAlarmIntervalRef.current);
-      continuousAlarmIntervalRef.current = null;
+  useEffect(() => {
+    attachUnlockListeners();
+    void loadAlarmBuffer(audioSrc);
+  }, [audioSrc, settings.volume]);
+
+  const playAlarm = useCallback(async (): Promise<AlarmPlaybackResult> => {
+    if (settings.volume === 'off') {
+      return { played: false, reason: 'disabled' };
     }
-  }, []);
 
-  const playAlarm = useCallback(async () => {
-    if (settings.volume === 'off' || !audioRef.current) return;
+    const context = getAudioContext();
+    if (!context) {
+      return { played: false, reason: 'unsupported' };
+    }
 
     const volumeLevel = ALARM_VOLUME_MAP[settings.volume] ?? ALARM_VOLUME_MAP['medium'];
-    audioRef.current.volume = volumeLevel;
+    if (sharedAlarmAudioState.gainNode) {
+      sharedAlarmAudioState.gainNode.gain.value = volumeLevel;
+    }
 
     try {
-      audioRef.current.currentTime = 0;
-      await audioRef.current.play();
+      await unlockAlarmAudioContext();
+      const buffer = await loadAlarmBuffer(audioSrc);
+      if (!buffer || !sharedAlarmAudioState.gainNode) {
+        return { played: false, reason: 'failed' };
+      }
+
+      const source = context.createBufferSource();
+      source.buffer = buffer;
+      source.connect(sharedAlarmAudioState.gainNode);
+      source.start(0);
+      return { played: true, reason: 'played' };
     } catch (error) {
-      console.warn("EnhancedSpeedQueue: Failed to play alarm audio. This is normal if the user hasn't interacted with the page yet.", error);
+      console.warn('EnhancedSpeedQueue: Failed to play alarm audio buffer.', error);
+      return {
+        played: false,
+        reason: context.state === 'running' ? 'failed' : 'blocked',
+      };
     }
-  }, [settings.volume]);
+  }, [audioSrc, settings.volume]);
 
   return {
-    audioRef,
     playAlarm,
-    clearContinuousAlarm,
-    continuousAlarmIntervalRef,
   };
 }

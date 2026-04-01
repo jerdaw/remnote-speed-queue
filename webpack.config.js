@@ -12,6 +12,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 const isProd = process.env.NODE_ENV === 'production';
 const isDevelopment = !isProd;
+const isNativeLikeLocalhost = process.env.REMNOTE_LOCALHOST_RUNTIME === 'native-like';
 
 const fastRefresh = isDevelopment ? new ReactRefreshWebpackPlugin() : null;
 
@@ -69,7 +70,7 @@ const config = {
 
       const s = document.createElement('script');
       s.type = "module";
-      s.src = widgetName+"${SANDBOX_SUFFIX}.js";
+      s.src = widgetName+${JSON.stringify(isNativeLikeLocalhost ? '.js' : `${SANDBOX_SUFFIX}.js`)};
       document.body.appendChild(s);
       </script>
     `,
@@ -101,11 +102,11 @@ if (isProd) {
     minimize: isProd,
     minimizer: [new ESBuildMinifyPlugin()],
   };
-} else {
+  } else {
   // for more information, see https://webpack.js.org/configuration/dev-server
   config.devServer = {
     port: 8080,
-    open: true,
+    open: false,
     hot: true,
     compress: true,
     watchFiles: ['src/*'],

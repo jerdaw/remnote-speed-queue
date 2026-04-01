@@ -1,47 +1,36 @@
-import { useState, useEffect, useRef } from 'react';
-import { useAPIEventListener, usePlugin, AppEvents, WidgetLocation } from '@remnote/plugin-sdk';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useAPIEventListener, usePlugin, AppEvents } from '@remnote/plugin-sdk';
 
 export function useCardTracker() {
   const plugin = usePlugin();
   const [cardId, setCardId] = useState<string | null>(null);
-  const cardIdRef = useRef<string | null>(null);
+  const requestIdRef = useRef(0);
 
-  // Keep ref in sync to avoid stale closures in event listeners
-  useEffect(() => {
-    cardIdRef.current = cardId;
-  }, [cardId]);
+  const syncCurrentCard = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    const currentCard = await plugin.queue.getCurrentCard();
 
-  // Initial fetch
-  useEffect(() => {
-    async function fetchInitial() {
-      const ctx = await plugin.widget.getWidgetContext<WidgetLocation.QueueBelowTopBar>();
-      if (ctx?.cardId) {
-        setCardId(ctx.cardId);
-      }
+    if (requestId !== requestIdRef.current) {
+      return;
     }
-    fetchInitial();
+
+    setCardId(currentCard?._id ?? null);
   }, [plugin]);
 
-  // When a card is completed, wait slightly for the queue to transition to the next card
-  useAPIEventListener(AppEvents.QueueCompleteCard, undefined, async () => {
-    setTimeout(async () => {
-      const oldCardIdInEvent = cardIdRef.current;
-      const ctx = await plugin.widget.getWidgetContext<WidgetLocation.QueueBelowTopBar>();
-      if (ctx?.cardId !== oldCardIdInEvent) {
-        setCardId(ctx?.cardId ?? null);
-      } else if (!ctx?.cardId && oldCardIdInEvent) {
-        setCardId(null);
-      }
-    }, 150);
+  useEffect(() => {
+    void syncCurrentCard();
+  }, [syncCurrentCard]);
+
+  useAPIEventListener(AppEvents.QueueLoadCard, undefined, () => {
+    void syncCurrentCard();
   });
 
-  // Handle entering and exiting the queue
   useAPIEventListener(AppEvents.QueueEnter, undefined, async () => {
-    const ctx = await plugin.widget.getWidgetContext<WidgetLocation.QueueBelowTopBar>();
-    setCardId(ctx?.cardId ?? null);
+    void syncCurrentCard();
   });
 
   useAPIEventListener(AppEvents.QueueExit, undefined, () => {
+    requestIdRef.current += 1;
     setCardId(null);
   });
 

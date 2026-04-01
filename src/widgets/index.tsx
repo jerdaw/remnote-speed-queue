@@ -4,6 +4,7 @@ import '../App.css';
 import {
   ENABLE_PROGRESS_BAR_KEY,
   READING_SPEED_KEY,
+  INITIAL_ALARM_DELAY_KEY,
   ALARM_VOLUME_KEY,
   REPEAT_ALARM_INTERVAL_KEY,
   AUTO_SHOW_ANSWER_KEY,
@@ -12,6 +13,7 @@ import {
   ADDITIVE_AUTO_ANSWER_DELAY_KEY,
   DEFAULT_ENABLE_PROGRESS_BAR,
   DEFAULT_READING_SPEED,
+  DEFAULT_INITIAL_ALARM_DELAY,
   MIN_READING_SPEED,
   MAX_READING_SPEED,
   DEFAULT_ALARM_VOLUME,
@@ -25,9 +27,16 @@ import {
 async function onActivate(plugin: ReactRNPlugin) {
   // --- Timer ---
   await plugin.settings.registerNumberSetting({
+    id: INITIAL_ALARM_DELAY_KEY,
+    title: 'Initial Wait Time (sec, 0 = auto)',
+    description: '0 = auto-calculate from the full rem length. Any positive value = fixed manual delay.',
+    defaultValue: DEFAULT_INITIAL_ALARM_DELAY,
+  });
+
+  await plugin.settings.registerNumberSetting({
     id: READING_SPEED_KEY,
-    title: 'Reading Speed',
-    description: `How fast you read. Lower = less time per card, higher = more time. Range: ${MIN_READING_SPEED}x to ${MAX_READING_SPEED}x. The timer automatically adapts to card length.`,
+    title: 'Auto Timing Multiplier',
+    description: `Used only when Initial Wait Time is 0. 1.0 = default. Lower = less time, higher = more time. Range: ${MIN_READING_SPEED}x to ${MAX_READING_SPEED}x. Auto mode uses the full rem, including hidden/back content.`,
     defaultValue: DEFAULT_READING_SPEED,
   });
 
@@ -47,7 +56,7 @@ async function onActivate(plugin: ReactRNPlugin) {
 
   await plugin.settings.registerNumberSetting({
     id: REPEAT_ALARM_INTERVAL_KEY,
-    title: 'Repeat Alarm Every (sec, 0 = off)',
+    title: 'Repeat Alarm Interval (sec, 0 = off)',
     description: 'How often the alarm repeats after the initial trigger. Set to 0 to disable repeating.',
     defaultValue: DEFAULT_REPEAT_ALARM_INTERVAL,
   });
@@ -55,21 +64,21 @@ async function onActivate(plugin: ReactRNPlugin) {
   // --- Automation ---
   await plugin.settings.registerBooleanSetting({
     id: AUTO_SHOW_ANSWER_KEY,
-    title: 'Auto Show Answer',
+    title: 'Auto-Reveal Answer',
     description: 'Automatically reveal the card answer after the alarm fires plus the delay below.',
     defaultValue: DEFAULT_AUTO_SHOW_ANSWER,
   });
 
   await plugin.settings.registerNumberSetting({
     id: ADDITIVE_SHOW_ANSWER_DELAY_KEY,
-    title: 'Show Answer Delay (sec after alarm)',
+    title: 'Reveal Delay (sec after alarm)',
     description: 'Seconds after the alarm before the answer is automatically shown.',
     defaultValue: DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY,
   });
 
   await plugin.settings.registerDropdownSetting({
     id: AUTO_ANSWER_ACTION_KEY,
-    title: 'Auto Answer Card',
+    title: 'Auto Rate / Skip Card',
     description: 'Automatically rate or skip the card after the answer is shown. Select "Off" to disable auto-answering.',
     defaultValue: DEFAULT_AUTO_ANSWER_ACTION,
     options: [
@@ -81,7 +90,7 @@ async function onActivate(plugin: ReactRNPlugin) {
 
   await plugin.settings.registerNumberSetting({
     id: ADDITIVE_AUTO_ANSWER_DELAY_KEY,
-    title: 'Auto-Answer Delay (sec after answer shown)',
+    title: 'Auto Rate Delay (sec after reveal)',
     description: 'Seconds after the answer is revealed before the auto-answer action triggers.',
     defaultValue: DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY,
   });
@@ -90,7 +99,7 @@ async function onActivate(plugin: ReactRNPlugin) {
   await plugin.settings.registerBooleanSetting({
     id: ENABLE_PROGRESS_BAR_KEY,
     title: 'Show Progress Bar',
-    description: 'Show or hide the 1px timer progress bar above the card.',
+    description: 'Show the timer bar above the card. It also flashes when the alarm fires.',
     defaultValue: DEFAULT_ENABLE_PROGRESS_BAR,
   });
 

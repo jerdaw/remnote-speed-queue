@@ -6,8 +6,10 @@
   "scripts": {
     "check-types": "tsc",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --color --progress --no-open",
+    "dev:native-like": "cross-env NODE_ENV=development REMNOTE_LOCALHOST_RUNTIME=native-like webpack-dev-server --color --progress --no-open",
     "test": "vitest run",
-    "build": "npx remnote-plugin validate && shx rm -rf dist && cross-env NODE_ENV=production webpack --color --progress && shx cp README.md dist && cd dist && bestzip ../PluginZip.zip ./*"
+    "build": "npx remnote-plugin validate && shx rm -rf dist && cross-env NODE_ENV=production webpack --color --progress && shx cp README.md dist && cd dist && bestzip ../PluginZip.zip ./*",
+    "package:native-test": "npm run build"
   },
   "dependencies": {
     "@remnote/plugin-sdk": "^0.0.41",

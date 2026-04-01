@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2026-04-01
 
+## [Unreleased]
+
+### Changed
+- **Alarm Semantics**: The alarm is now documented and implemented as visual-first with best-effort audio, rather than assuming audio is always available.
+- **Development Workflow**: Added a `dev:native-like` localhost mode.
+
+### Fixed
+- **Scheduler Stability**: Prevented rapid alarm retriggering caused by unstable timer-effect dependencies during bar rerenders.
+- **Audio Fallback**: Added a reliable visual alarm pulse when RemNote/browser runtime blocks audio playback.
+- **Auto Timing Input**: Auto-detect delay now uses the full rem, including hidden/back content.
+
 ### Added
 - **Native Mode**: Switched to `requestNative: true` to unlock consistent audio autoplay.
 - **Persistent Audio**: Audio is now managed in JS memory to prevent cutting off during fast card skips.
@@ -15,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **UX Simplification**: Reduced settings from 17 down to 9 intuitive options.
-- **Auto-Detect by Default**: Removed "Manual Initial Delay" mode in favor of adaptive word-count timers.
+- **Timer UX**: `Initial Wait Time (sec)` now controls both modes: `0` means auto, any positive value means a fixed manual delay.
 - **Theme Support**: Progress bar now uses `currentColor` to match RemNote themes automatically.
 - **Multiplier Renaming**: Changed "Multiplier" to "Reading Speed" for better clarity.
 
