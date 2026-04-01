@@ -11,11 +11,7 @@ export function useAlarmAudio(settings: QueueSettings['alarm']) {
 
   useEffect(() => {
     if (!globalAudio && plugin.rootURL) {
-      const audioEl = document.createElement('audio');
-      audioEl.src = `${plugin.rootURL}ding.mp3`;
-      audioEl.style.display = 'none';
-      document.body.appendChild(audioEl);
-      globalAudio = audioEl;
+      globalAudio = new window.Audio(`${plugin.rootURL}ding.mp3`);
     }
   }, [plugin.rootURL]);
 

@@ -15,7 +15,7 @@
   "theme": [],
   "enableOnMobile": true,
   "description": "An enhanced speed-focused flashcard queue with configurable timers, colors, continuous alarms, and flexible auto-answer options.",
-  "requestNative": false,
+  "requestNative": true,
   "requiredScopes": [
     {
       "type": "All",
