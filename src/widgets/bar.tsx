@@ -13,7 +13,7 @@ export function Bar() {
   const settings = useQueueSettings();
   const { cardId } = useCardTracker();
   const alarmDelaySec = useAutoDetectDelay(cardId, settings.timer.readingSpeed);
-  const { audioRef, playAlarm, clearContinuousAlarm, continuousAlarmIntervalRef } = useAlarmAudio(settings.alarm);
+  const { playAlarm, clearContinuousAlarm, continuousAlarmIntervalRef } = useAlarmAudio(settings.alarm);
   const { startTime } = useTimerStateMachine(
     cardId,
     alarmDelaySec,
@@ -60,7 +60,6 @@ export function Bar() {
           }}
         ></div>
       )}
-      <audio ref={audioRef} src={plugin.rootURL ? `${plugin.rootURL}ding.mp3` : ''} />
     </div>
   );
 }

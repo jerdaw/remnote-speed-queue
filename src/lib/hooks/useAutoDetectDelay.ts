@@ -29,7 +29,7 @@ export function useAutoDetectDelay(
       }
 
       try {
-        const currentCardObject = await plugin.queue.getCurrentCard();
+        const currentCardObject = await plugin.card.findOne(cardId);
         let frontRichText: RichTextInterface | undefined = undefined;
         let backRichText: RichTextInterface | undefined = undefined;
 

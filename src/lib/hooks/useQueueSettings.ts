@@ -6,9 +6,8 @@ import {
   REPEAT_ALARM_INTERVAL_KEY,
   AUTO_SHOW_ANSWER_KEY,
   ADDITIVE_SHOW_ANSWER_DELAY_KEY,
-  AUTO_ANSWER_KEY,
-  ADDITIVE_AUTO_ANSWER_DELAY_KEY,
   AUTO_ANSWER_ACTION_KEY,
+  ADDITIVE_AUTO_ANSWER_DELAY_KEY,
   DEFAULT_ENABLE_PROGRESS_BAR,
   DEFAULT_READING_SPEED,
   MIN_READING_SPEED,
@@ -17,7 +16,6 @@ import {
   DEFAULT_REPEAT_ALARM_INTERVAL,
   DEFAULT_AUTO_SHOW_ANSWER,
   DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY,
-  DEFAULT_AUTO_ANSWER,
   DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY,
   DEFAULT_AUTO_ANSWER_ACTION,
 } from '../constants';
@@ -36,7 +34,6 @@ export interface QueueSettings {
   auto: {
     autoShowAnswerEnabled: boolean;
     additiveShowAnswerDelaySec: number;
-    autoAnswerEnabled: boolean;
     additiveAutoAnswerDelaySec: number;
     autoAnswerAction: string;
   };
@@ -59,7 +56,6 @@ export function useQueueSettings(): QueueSettings {
   const autoRaw = useTracker(async (rp) => ({
     autoShowAnswerEnabled: (await rp.settings.getSetting<boolean>(AUTO_SHOW_ANSWER_KEY)) ?? DEFAULT_AUTO_SHOW_ANSWER,
     additiveShowAnswerDelaySec: (await rp.settings.getSetting<number>(ADDITIVE_SHOW_ANSWER_DELAY_KEY)) ?? DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY,
-    autoAnswerEnabled: (await rp.settings.getSetting<boolean>(AUTO_ANSWER_KEY)) ?? DEFAULT_AUTO_ANSWER,
     autoAnswerAction: (await rp.settings.getSetting<string>(AUTO_ANSWER_ACTION_KEY)) ?? DEFAULT_AUTO_ANSWER_ACTION,
     additiveAutoAnswerDelaySec: (await rp.settings.getSetting<number>(ADDITIVE_AUTO_ANSWER_DELAY_KEY)) ?? DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY,
   }), []);
@@ -80,7 +76,6 @@ export function useQueueSettings(): QueueSettings {
     auto: {
       autoShowAnswerEnabled: autoRaw?.autoShowAnswerEnabled ?? DEFAULT_AUTO_SHOW_ANSWER,
       additiveShowAnswerDelaySec: Math.max(0, autoRaw?.additiveShowAnswerDelaySec ?? DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY),
-      autoAnswerEnabled: autoRaw?.autoAnswerEnabled ?? DEFAULT_AUTO_ANSWER,
       autoAnswerAction: autoRaw?.autoAnswerAction ?? DEFAULT_AUTO_ANSWER_ACTION,
       additiveAutoAnswerDelaySec: Math.max(0, autoRaw?.additiveAutoAnswerDelaySec ?? DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY),
     },

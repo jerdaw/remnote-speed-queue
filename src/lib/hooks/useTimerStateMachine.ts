@@ -67,7 +67,7 @@ export function useTimerStateMachine(
     }
 
     // Timer 3: Auto Answer
-    if (settings.auto.autoAnswerEnabled) {
+    if (settings.auto.autoAnswerAction !== 'off') {
       const answerDelay = Math.max(0, autoAnswerTriggerTimeMs - (Date.now() - startTime));
       timers.push(setTimeout(async () => {
         if (settings.auto.autoAnswerAction === 'skip') {
@@ -88,7 +88,7 @@ export function useTimerStateMachine(
   }, [
     cardId, startTime, alarmDelaySec,
     settings.auto.autoShowAnswerEnabled, settings.auto.additiveShowAnswerDelaySec,
-    settings.auto.autoAnswerEnabled, settings.auto.additiveAutoAnswerDelaySec, settings.auto.autoAnswerAction,
+    settings.auto.additiveAutoAnswerDelaySec, settings.auto.autoAnswerAction,
     settings.alarm.repeatIntervalSec,
     playAlarm, clearContinuousAlarm, continuousAlarmIntervalRef, plugin,
     setSkippedCount, setAutoAnsweredCount

@@ -8,7 +8,6 @@ import {
   REPEAT_ALARM_INTERVAL_KEY,
   AUTO_SHOW_ANSWER_KEY,
   ADDITIVE_SHOW_ANSWER_DELAY_KEY,
-  AUTO_ANSWER_KEY,
   AUTO_ANSWER_ACTION_KEY,
   ADDITIVE_AUTO_ANSWER_DELAY_KEY,
   DEFAULT_ENABLE_PROGRESS_BAR,
@@ -19,7 +18,6 @@ import {
   DEFAULT_REPEAT_ALARM_INTERVAL,
   DEFAULT_AUTO_SHOW_ANSWER,
   DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY,
-  DEFAULT_AUTO_ANSWER,
   DEFAULT_AUTO_ANSWER_ACTION,
   DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY,
 } from '../lib/constants';
@@ -69,19 +67,13 @@ async function onActivate(plugin: ReactRNPlugin) {
     defaultValue: DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY,
   });
 
-  await plugin.settings.registerBooleanSetting({
-    id: AUTO_ANSWER_KEY,
-    title: 'Auto Answer Card',
-    description: 'Automatically answer the card after the answer has been shown for the delay below.',
-    defaultValue: DEFAULT_AUTO_ANSWER,
-  });
-
   await plugin.settings.registerDropdownSetting({
     id: AUTO_ANSWER_ACTION_KEY,
-    title: 'Auto-Answer Action',
-    description: 'How the card is automatically answered.',
+    title: 'Auto Answer Card',
+    description: 'Automatically rate or skip the card after the answer is shown. Select "Off" to disable auto-answering.',
     defaultValue: DEFAULT_AUTO_ANSWER_ACTION,
     options: [
+      { key: 'off', value: 'off', label: 'Off (Do nothing)' },
       { key: 'again', value: 'again', label: 'Forgotten/Again' },
       { key: 'skip', value: 'skip', label: 'Skip Card (remove from session)' },
     ],

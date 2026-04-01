@@ -14,7 +14,6 @@ export const REPEAT_ALARM_INTERVAL_KEY = 'continuousAlarmInterval'; // keep same
 // --- Automation ---
 export const AUTO_SHOW_ANSWER_KEY = 'autoShowAnswer';
 export const ADDITIVE_SHOW_ANSWER_DELAY_KEY = 'additiveShowAnswerDelay';
-export const AUTO_ANSWER_KEY = 'autoAnswer';
 export const AUTO_ANSWER_ACTION_KEY = 'autoAnswerAction';
 export const ADDITIVE_AUTO_ANSWER_DELAY_KEY = 'additiveAutoAnswerDelay';
 
@@ -50,6 +49,5 @@ export const DEFAULT_REPEAT_ALARM_INTERVAL = 0; // 0 = no repeat
 // --- Automation ---
 export const DEFAULT_AUTO_SHOW_ANSWER = true;
 export const DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY = 3; // seconds
-export const DEFAULT_AUTO_ANSWER = true;
-export const DEFAULT_AUTO_ANSWER_ACTION = 'again'; // 'again' or 'skip'
+export const DEFAULT_AUTO_ANSWER_ACTION = 'again'; // 'off', 'again', or 'skip'
 export const DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY = 2; // seconds

@@ -36,8 +36,7 @@ All settings are in `Settings > Plugins > Enhanced Speed Queue`.
 |---|---|---|
 | **Auto Show Answer** | Automatically reveal the answer after the alarm. | ✅ On |
 | **Show Answer Delay** | Seconds after the alarm before the answer is shown. | 3 |
-| **Auto Answer Card** | Automatically rate the card after the answer is shown. | ✅ On |
-| **Auto-Answer Action** | Forgotten/Again or Skip (remove from session). | Again |
+| **Auto-Answer Action** | How to rate the card. Off / Forgotten (Again) / Skip (remove from session). "Off" disables auto-answering completely. | Again |
 | **Auto-Answer Delay** | Seconds after the answer is shown before auto-answer triggers. | 2 |
 
 ### Display

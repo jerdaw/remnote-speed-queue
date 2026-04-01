@@ -1,10 +1,23 @@
-import { useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { usePlugin } from '@remnote/plugin-sdk';
 import { QueueSettings } from './useQueueSettings';
 import { ALARM_VOLUME_MAP } from '../constants';
 
+let globalAudio: HTMLAudioElement | null = null;
+
 export function useAlarmAudio(settings: QueueSettings['alarm']) {
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const plugin = usePlugin();
   const continuousAlarmIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!globalAudio && plugin.rootURL) {
+      const audioEl = document.createElement('audio');
+      audioEl.src = `${plugin.rootURL}ding.mp3`;
+      audioEl.style.display = 'none';
+      document.body.appendChild(audioEl);
+      globalAudio = audioEl;
+    }
+  }, [plugin.rootURL]);
 
   const clearContinuousAlarm = useCallback(() => {
     if (continuousAlarmIntervalRef.current) {
@@ -14,21 +27,20 @@ export function useAlarmAudio(settings: QueueSettings['alarm']) {
   }, []);
 
   const playAlarm = useCallback(async () => {
-    if (settings.volume === 'off' || !audioRef.current) return;
+    if (settings.volume === 'off' || !globalAudio) return;
 
     const volumeLevel = ALARM_VOLUME_MAP[settings.volume] ?? ALARM_VOLUME_MAP['medium'];
-    audioRef.current.volume = volumeLevel;
+    globalAudio.volume = volumeLevel;
 
     try {
-      audioRef.current.currentTime = 0;
-      await audioRef.current.play();
+      globalAudio.currentTime = 0;
+      await globalAudio.play();
     } catch (error) {
       console.warn("EnhancedSpeedQueue: Failed to play alarm audio. This is normal if the user hasn't interacted with the page yet.", error);
     }
   }, [settings.volume]);
 
   return {
-    audioRef,
     playAlarm,
     clearContinuousAlarm,
     continuousAlarmIntervalRef,
