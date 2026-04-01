@@ -2,11 +2,9 @@ import { useState, useEffect } from 'react';
 import { usePlugin } from '@remnote/plugin-sdk';
 import type { RichTextInterface } from '@remnote/plugin-sdk';
 import {
-  WORDS_PER_MINUTE,
-  AUTO_DETECT_MIN_SEC,
-  AUTO_DETECT_MAX_SEC,
   DEFAULT_MANUAL_FALLBACK_DELAY,
 } from '../constants';
+import { calculateClampedDelay } from '../utils/timer-utils';
 
 const COMPONENT_NAME = "EnhancedSpeedQueueBar";
 
@@ -54,12 +52,9 @@ export function useAutoDetectDelay(
           const wordCount = words.length;
 
           if (wordCount > 0) {
-            const baseDelay = (wordCount / WORDS_PER_MINUTE) * 60;
-            const scaledDelay = baseDelay * readingSpeed;
-            const clampedDelay = Math.max(AUTO_DETECT_MIN_SEC, Math.min(AUTO_DETECT_MAX_SEC, scaledDelay));
-
-            console.log(`[${COMPONENT_NAME}] AutoDetect: ${cardId} — ${wordCount} words, ${readingSpeed}x speed → ${Math.round(clampedDelay)}s`);
-            setCurrentDelaySec(Math.round(clampedDelay));
+            const finalDelay = calculateClampedDelay(wordCount, readingSpeed);
+            console.log(`[${COMPONENT_NAME}] AutoDetect: ${cardId} — ${wordCount} words, ${readingSpeed}x speed → ${finalDelay}s`);
+            setCurrentDelaySec(finalDelay);
           } else {
             setCurrentDelaySec(DEFAULT_MANUAL_FALLBACK_DELAY);
           }
