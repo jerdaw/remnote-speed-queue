@@ -24,6 +24,10 @@ import {
   DEFAULT_AUTO_ANSWER_ACTION,
 } from '../constants';
 
+export type AutoAnswerAction = 'off' | 'again' | 'skip';
+export type AlarmVolume = 'off' | 'low' | 'medium' | 'high';
+
+
 export interface QueueSettings {
   display: {
     enableProgressBar: boolean;
@@ -33,14 +37,14 @@ export interface QueueSettings {
     initialDelaySec: number; // 0 = auto, >0 = manual override
   };
   alarm: {
-    volume: string;       // 'off' | 'low' | 'medium' | 'high'
+    volume: AlarmVolume;       // 'off' | 'low' | 'medium' | 'high'
     repeatIntervalSec: number; // 0 = no repeat
   };
   auto: {
     autoShowAnswerEnabled: boolean;
     additiveShowAnswerDelaySec: number;
     additiveAutoAnswerDelaySec: number;
-    autoAnswerAction: string;
+    autoAnswerAction: AutoAnswerAction;
   };
 }
 
@@ -55,7 +59,7 @@ export function useQueueSettings(): QueueSettings {
     legacyMode: await rp.settings.getSetting<string>(TIMER_MODE_KEY),
     readingSpeed: (await rp.settings.getSetting<number>(READING_SPEED_KEY)) ?? DEFAULT_READING_SPEED,
     initialDelaySec: (await rp.settings.getSetting<number>(INITIAL_ALARM_DELAY_KEY)) ?? DEFAULT_INITIAL_ALARM_DELAY,
-    volume: (await rp.settings.getSetting<string>(ALARM_VOLUME_KEY)) ?? DEFAULT_ALARM_VOLUME,
+    volume: (await rp.settings.getSetting<AlarmVolume>(ALARM_VOLUME_KEY)) ?? DEFAULT_ALARM_VOLUME as AlarmVolume,
     repeatIntervalSec: (await rp.settings.getSetting<number>(REPEAT_ALARM_INTERVAL_KEY)) ?? DEFAULT_REPEAT_ALARM_INTERVAL,
   }), []);
 
@@ -63,7 +67,7 @@ export function useQueueSettings(): QueueSettings {
   const autoRaw = useTracker(async (rp) => ({
     autoShowAnswerEnabled: (await rp.settings.getSetting<boolean>(AUTO_SHOW_ANSWER_KEY)) ?? DEFAULT_AUTO_SHOW_ANSWER,
     additiveShowAnswerDelaySec: (await rp.settings.getSetting<number>(ADDITIVE_SHOW_ANSWER_DELAY_KEY)) ?? DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY,
-    autoAnswerAction: (await rp.settings.getSetting<string>(AUTO_ANSWER_ACTION_KEY)) ?? DEFAULT_AUTO_ANSWER_ACTION,
+    autoAnswerAction: (await rp.settings.getSetting<AutoAnswerAction>(AUTO_ANSWER_ACTION_KEY)) ?? DEFAULT_AUTO_ANSWER_ACTION as AutoAnswerAction,
     additiveAutoAnswerDelaySec: (await rp.settings.getSetting<number>(ADDITIVE_AUTO_ANSWER_DELAY_KEY)) ?? DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY,
   }), []);
 
@@ -89,7 +93,7 @@ export function useQueueSettings(): QueueSettings {
     auto: {
       autoShowAnswerEnabled: autoRaw?.autoShowAnswerEnabled ?? DEFAULT_AUTO_SHOW_ANSWER,
       additiveShowAnswerDelaySec: Math.max(0, autoRaw?.additiveShowAnswerDelaySec ?? DEFAULT_ADDITIVE_SHOW_ANSWER_DELAY),
-      autoAnswerAction: autoRaw?.autoAnswerAction ?? DEFAULT_AUTO_ANSWER_ACTION,
+      autoAnswerAction: (autoRaw?.autoAnswerAction ?? DEFAULT_AUTO_ANSWER_ACTION) as AutoAnswerAction,
       additiveAutoAnswerDelaySec: Math.max(0, autoRaw?.additiveAutoAnswerDelaySec ?? DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY),
     },
   };

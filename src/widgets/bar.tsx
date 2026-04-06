@@ -7,9 +7,11 @@ import { useCardTracker } from '../lib/hooks/useCardTracker';
 import { useAutoDetectDelay } from '../lib/hooks/useAutoDetectDelay';
 import { useAlarmAudio } from '../lib/hooks/useAlarmAudio';
 import { useTimerStateMachine } from '../lib/hooks/useTimerStateMachine';
+import { useTheme } from '../lib/hooks/useTheme';
 
 export function Bar() {
   const settings = useQueueSettings();
+  const { isDark } = useTheme();
   const { cardId } = useCardTracker();
   const delayState = useAutoDetectDelay(
     cardId,
@@ -59,11 +61,17 @@ export function Bar() {
             height: visualAlarmActive ? '4px' : '2px',
             backgroundColor: visualAlarmActive
               ? 'var(--rn-clr-background-orange, #f59e0b)'
-              : 'var(--rn-clr-content-accent, currentColor)',
-            boxShadow: visualAlarmActive ? '0 0 0 1px rgba(245, 158, 11, 0.2)' : 'none',
-            opacity: visualAlarmActive ? 1 : 0.8,
+              : isDark
+                ? 'var(--rn-clr-content-accent, #3b82f6)' // Bright blue in dark mode
+                : 'var(--rn-clr-content-accent, #2563eb)', // Strong blue in light mode
+            boxShadow: visualAlarmActive
+              ? '0 0 10px rgba(245, 158, 11, 0.6)'
+              : isDark
+                ? '0 0 4px rgba(59, 130, 246, 0.3)'
+                : 'none',
+            opacity: visualAlarmActive ? 1 : 0.7,
             width: visualAlarmActive ? '100%' : `${width}%`,
-            transition: 'height 120ms ease, opacity 120ms ease, width 120ms linear',
+            transition: 'height 120ms ease, opacity 120ms ease, width 120ms linear, background-color 200ms ease',
           }}
         ></div>
       )}

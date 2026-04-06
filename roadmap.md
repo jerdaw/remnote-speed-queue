@@ -10,13 +10,18 @@ Strategic goals and planned technical improvements for the RemNote Speed Queue p
 - [x] Simplify settings UI from 17 down to 9 intuitive options.
 - [x] Resolve sandbox audio autoplay restrictions by switching to Native mode.
 
-## Phase 2: Reliability & Visibility (Current)
+## Phase 2: Reliability & Visibility (Completed)
 
-- [ ] **Automated Testing**: Establish a Vitest suite for non-obvious logic in hooks (e.g., word-count time calculation).
-- [ ] **Theme Intelligence**: Improve detection of RemNote theme colors for the progress bar.
-- [ ] **Mobile Parity**: Research workarounds for mobile audio limitations (browser-level gesture requirements).
+- [x] **Automated Testing**: Established Vitest suite for word-count (12 tests).
+- [x] **Theme Intelligence**: Theme-aware progress bar (Dark/Light detection).
+- [x] **Mobile Parity**: Audio context priming for mobile audio reliability.
 
-## Phase 3: Advanced Optimization (Planned)
+## Phase 3: Advanced Optimization (Current)
+
+- [ ] **Visual Feedback**: Subtly flash the screen or border when the alarm triggers for silent focus.
+- [ ] **Session Stats**: Provide a "Speed Summary" at the end of a queue session.
+- [ ] **Per-Document Settings**: Research allowing different reading speeds for specific folders.
+- [ ] **Color Customization**: Allow users to pick their own progress bar colors in settings.
 
 - [ ] **Per-Document Settings**: Allow different reading speeds for different folders or documents.
 - [ ] **Session Stats**: Provide a "Speed Summary" at the end of a queue session.

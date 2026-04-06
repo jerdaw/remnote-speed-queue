@@ -3,6 +3,7 @@ import { QueueInteractionScore, usePlugin } from '@remnote/plugin-sdk';
 import { QueueSettings } from './useQueueSettings';
 import { useSessionStats } from './useSessionStats';
 import type { AlarmPlaybackResult } from './useAlarmAudio';
+import { calculateDeadlines } from '../utils/timer-state';
 
 const VISUAL_ALARM_DURATION_MS = 1500;
 let hasShownAudioFallbackToast = false;
@@ -82,12 +83,15 @@ export function useTimerStateMachine(
     // after the deadline has passed and repeatedly fire "immediate" alarms.
     const timers: ReturnType<typeof setTimeout>[] = [];
     const intervals: ReturnType<typeof setInterval>[] = [];
-    const alarmTriggerTimeMs = alarmDelaySec * 1000;
-    const showAnswerTriggerTimeMs = (alarmDelaySec + settings.auto.additiveShowAnswerDelaySec) * 1000;
-    const autoAnswerTriggerTimeMs = (alarmDelaySec + settings.auto.additiveShowAnswerDelaySec + settings.auto.additiveAutoAnswerDelaySec) * 1000;
+    const deadlines = calculateDeadlines(startTime, alarmDelaySec, {
+      autoShowAnswerEnabled: settings.auto.autoShowAnswerEnabled,
+      additiveShowAnswerDelaySec: settings.auto.additiveShowAnswerDelaySec,
+      autoAnswerAction: settings.auto.autoAnswerAction,
+      additiveAutoAnswerDelaySec: settings.auto.additiveAutoAnswerDelaySec,
+    });
 
     // Timer 1: Initial alarm
-    const alarmDelay = Math.max(0, alarmTriggerTimeMs - (Date.now() - startTime));
+    const alarmDelay = Math.max(0, deadlines.alarmMs - Date.now());
     timers.push(setTimeout(async () => {
       await triggerAlarmRef.current();
       if (settings.alarm.repeatIntervalSec > 0) {
@@ -100,7 +104,7 @@ export function useTimerStateMachine(
 
     // Timer 2: Auto Show Answer
     if (settings.auto.autoShowAnswerEnabled) {
-      const showDelay = Math.max(0, showAnswerTriggerTimeMs - (Date.now() - startTime));
+      const showDelay = Math.max(0, deadlines.showAnswerMs - Date.now());
       timers.push(setTimeout(async () => {
         await pluginRef.current.queue.showAnswer();
       }, showDelay));
@@ -108,7 +112,7 @@ export function useTimerStateMachine(
 
     // Timer 3: Auto Answer
     if (settings.auto.autoAnswerAction !== 'off') {
-      const answerDelay = Math.max(0, autoAnswerTriggerTimeMs - (Date.now() - startTime));
+      const answerDelay = Math.max(0, deadlines.autoAnswerMs - Date.now());
       timers.push(setTimeout(async () => {
         if (settings.auto.autoAnswerAction === 'skip') {
           await pluginRef.current.queue.removeCurrentCardFromQueue(false);

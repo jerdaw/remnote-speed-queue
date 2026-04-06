@@ -10,6 +10,7 @@ type SharedAlarmAudioState = {
   buffer: AudioBuffer | null;
   loadingPromise: Promise<AudioBuffer | null> | null;
   unlockListenersAttached: boolean;
+  isPrimed: boolean;
 };
 
 let sharedAlarmAudioState: SharedAlarmAudioState = {
@@ -19,6 +20,7 @@ let sharedAlarmAudioState: SharedAlarmAudioState = {
   buffer: null,
   loadingPromise: null,
   unlockListenersAttached: false,
+  isPrimed: false,
 };
 
 function getAudioContext(): AudioContext | null {
@@ -70,6 +72,29 @@ async function loadAlarmBuffer(src?: string): Promise<AudioBuffer | null> {
   return sharedAlarmAudioState.loadingPromise;
 }
 
+async function primeAlarmAudioContext() {
+  const context = getAudioContext();
+  if (!context || sharedAlarmAudioState.isPrimed) return;
+
+  try {
+    // Play a tiny silent buffer to "prime" the speaker and satisfy browser autoplay requirements.
+    const silentBuffer = context.createBuffer(1, 1, 22050);
+    const source = context.createBufferSource();
+    source.buffer = silentBuffer;
+    source.connect(context.destination);
+    source.start(0);
+    
+    if (context.state === 'suspended') {
+      await context.resume();
+    }
+    
+    sharedAlarmAudioState.isPrimed = true;
+    console.log('EnhancedSpeedQueue: Audio context primed successfully.');
+  } catch (error) {
+    console.warn('EnhancedSpeedQueue: Failed to prime audio context.', error);
+  }
+}
+
 async function unlockAlarmAudioContext() {
   const context = getAudioContext();
   if (!context) return;
@@ -77,6 +102,7 @@ async function unlockAlarmAudioContext() {
   if (context.state !== 'running') {
     try {
       await context.resume();
+      await primeAlarmAudioContext();
     } catch (error) {
       console.warn('EnhancedSpeedQueue: Failed to resume audio context.', error);
     }
