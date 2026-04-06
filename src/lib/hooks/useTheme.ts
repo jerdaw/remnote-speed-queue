@@ -5,9 +5,12 @@ import { useState, useEffect } from 'react';
  * RemNote sets the `.dark` class on `document.documentElement` (html element).
  */
 export function useTheme() {
-  const [isDark, setIsDark] = useState(() =>
-    typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
-  );
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document === 'undefined') return false;
+    const hasDarkClass = document.documentElement.classList.contains('dark');
+    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+    return hasDarkClass || prefersDark;
+  });
 
   useEffect(() => {
     if (typeof document === 'undefined') return;

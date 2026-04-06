@@ -3,7 +3,7 @@ import { usePlugin } from '@remnote/plugin-sdk';
 import {
   DEFAULT_MANUAL_FALLBACK_DELAY,
 } from '../constants';
-import { calculateAutoDetectDelayFromText } from '../utils/card-timer-utils';
+import { calculateAutoDetectDelayFromText } from '../utils/timer-math';
 
 const COMPONENT_NAME = "EnhancedSpeedQueueBar";
 
