@@ -2,24 +2,7 @@
 
 Strategic goals and planned technical improvements for the RemNote Speed Queue plugin.
 
-## Phase 1: Core Performance & UX (Completed)
-
-- [x] Decouple monolithic Bar logic into specialized hooks.
-- [x] Implement `requestAnimationFrame` for smooth progress bar updates.
-- [x] Standardize on "Auto-Detect" as the primary timer mode.
-- [x] Simplify settings UI from 17 down to 9 intuitive options.
-- [x] Resolve sandbox audio autoplay restrictions by switching to Native mode.
-
-## Phase 2: Reliability & Visibility (Completed)
-
-- [x] **Automated Testing**: Established Vitest suite for word-count (12 tests).
-- [x] **Theme Intelligence**: Theme-aware progress bar (Dark/Light detection).
-- [x] **Mobile Parity**: Audio context priming for mobile audio reliability.
-
-## Phase 3: Advanced Optimization (Completed)
-
-- [x] **Visual Feedback**: Minimal screen flash/overlay for silent focus.
-- [x] **Per-Document Settings**: Tag-based speed overrides using `#Speed:X`.
+*Phases 1, 2, and 3 have been completed and fully realized in the v0.2.x series. See CHANGELOG.md for details of those milestones.*
 
 ## Phase 4: Adaptive Intelligence (Planned)
 
