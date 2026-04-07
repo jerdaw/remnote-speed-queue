@@ -42,6 +42,8 @@ Settings are located in `Settings > Plugins > Enhanced Speed Queue`.
 | **Auto** | **Auto Rate / Skip Card** | Off / Again / Skip Card. | `Again` |
 | **Auto** | **Auto Rate Delay (sec after reveal)** | Extra delay between answer reveal and auto rate/skip. | `2` |
 | **Display** | **Show Progress Bar** | Show the theme-aware timer bar above the card; it also flashes on alarm. | ✅ On |
+| **Advanced** | **Enable Visual Screen Flash** | Flashes a minimal screen-border overlay when the alarm triggers. Great for silent study. | ❌ Off |
+| **Advanced** | **Allow Tag Overrides (#Speed:X)** | Allow folders/documents tagged with `#Speed:1.5` to override the global reading speed. | ✅ On |
 
 ## Architecture Overview
 
