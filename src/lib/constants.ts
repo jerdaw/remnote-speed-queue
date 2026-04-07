@@ -18,9 +18,6 @@ export const ADDITIVE_SHOW_ANSWER_DELAY_KEY = 'additiveShowAnswerDelay';
 export const AUTO_ANSWER_ACTION_KEY = 'autoAnswerAction';
 export const ADDITIVE_AUTO_ANSWER_DELAY_KEY = 'additiveAutoAnswerDelay';
 export const ENABLE_VISUAL_FLASH_KEY = 'enableVisualFlash';
-export const ALARM_FLASH_COLOR_KEY = 'alarmFlashColor';
-export const PROGRESS_BAR_COLOR_KEY = 'progressBarColor';
-export const ENABLE_SESSION_SUMMARY_KEY = 'enableSessionSummary';
 export const ENABLE_TAG_OVERRIDES_KEY = 'enableTagOverrides';
 
 
@@ -61,7 +58,4 @@ export const DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY = 2; // seconds
 
 // --- Phase 3 Advanced ---
 export const DEFAULT_ENABLE_VISUAL_FLASH = false;
-export const DEFAULT_ALARM_FLASH_COLOR = '#f59e0b'; // Amber-500
-export const DEFAULT_PROGRESS_BAR_COLOR = ''; // Empty string = use theme defaults
-export const DEFAULT_ENABLE_SESSION_SUMMARY = true;
 export const DEFAULT_ENABLE_TAG_OVERRIDES = true;

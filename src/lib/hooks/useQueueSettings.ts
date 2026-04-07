@@ -23,14 +23,8 @@ import {
   DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY,
   DEFAULT_AUTO_ANSWER_ACTION,
   ENABLE_VISUAL_FLASH_KEY,
-  ALARM_FLASH_COLOR_KEY,
-  PROGRESS_BAR_COLOR_KEY,
-  ENABLE_SESSION_SUMMARY_KEY,
   ENABLE_TAG_OVERRIDES_KEY,
   DEFAULT_ENABLE_VISUAL_FLASH,
-  DEFAULT_ALARM_FLASH_COLOR,
-  DEFAULT_PROGRESS_BAR_COLOR,
-  DEFAULT_ENABLE_SESSION_SUMMARY,
   DEFAULT_ENABLE_TAG_OVERRIDES,
 } from '../constants';
 
@@ -58,9 +52,6 @@ export interface QueueSettings {
   };
   advanced: {
     enableVisualFlash: boolean;
-    alarmFlashColor: string;
-    progressBarColor: string;
-    enableSessionSummary: boolean;
     enableTagOverrides: boolean;
   };
 }
@@ -91,9 +82,6 @@ export function useQueueSettings(): QueueSettings {
   // Group 4: advanced
   const advanced = useTracker(async (rp) => ({
     enableVisualFlash: (await rp.settings.getSetting<boolean>(ENABLE_VISUAL_FLASH_KEY)) ?? DEFAULT_ENABLE_VISUAL_FLASH,
-    alarmFlashColor: (await rp.settings.getSetting<string>(ALARM_FLASH_COLOR_KEY)) ?? DEFAULT_ALARM_FLASH_COLOR,
-    progressBarColor: (await rp.settings.getSetting<string>(PROGRESS_BAR_COLOR_KEY)) ?? DEFAULT_PROGRESS_BAR_COLOR,
-    enableSessionSummary: (await rp.settings.getSetting<boolean>(ENABLE_SESSION_SUMMARY_KEY)) ?? DEFAULT_ENABLE_SESSION_SUMMARY,
     enableTagOverrides: (await rp.settings.getSetting<boolean>(ENABLE_TAG_OVERRIDES_KEY)) ?? DEFAULT_ENABLE_TAG_OVERRIDES,
   }), []);
 
@@ -124,9 +112,6 @@ export function useQueueSettings(): QueueSettings {
     },
     advanced: {
       enableVisualFlash: advanced?.enableVisualFlash ?? DEFAULT_ENABLE_VISUAL_FLASH,
-      alarmFlashColor: advanced?.alarmFlashColor || DEFAULT_ALARM_FLASH_COLOR,
-      progressBarColor: advanced?.progressBarColor || DEFAULT_PROGRESS_BAR_COLOR,
-      enableSessionSummary: advanced?.enableSessionSummary ?? DEFAULT_ENABLE_SESSION_SUMMARY,
       enableTagOverrides: advanced?.enableTagOverrides ?? DEFAULT_ENABLE_TAG_OVERRIDES,
     },
   };

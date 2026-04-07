@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { QueueInteractionScore, usePlugin } from '@remnote/plugin-sdk';
 import { QueueSettings } from './useQueueSettings';
-import { useSessionStats } from './useSessionStats';
 import type { AlarmPlaybackResult } from './useAlarmAudio';
 import { calculateDeadlines } from '../utils/timer-state';
 
@@ -21,20 +20,11 @@ export function useTimerStateMachine(
   const plugin = usePlugin();
   const [startTime, setStartTime] = useState<number | null>(null);
   const [visualAlarmUntil, setVisualAlarmUntil] = useState<number | null>(null);
-  const { autoAnsweredCount, setAutoAnsweredCount, skippedCount, setSkippedCount } = useSessionStats();
   const pluginRef = React.useRef(plugin);
   const playAlarmRef = React.useRef(playAlarm);
-  // Track latest counts in refs so setTimeout closures don't go stale
-  const autoAnsweredCountRef = React.useRef(autoAnsweredCount);
-  const skippedCountRef = React.useRef(skippedCount);
-  const setAutoAnsweredCountRef = React.useRef(setAutoAnsweredCount);
-  const setSkippedCountRef = React.useRef(setSkippedCount);
+
   React.useEffect(() => { pluginRef.current = plugin; }, [plugin]);
   React.useEffect(() => { playAlarmRef.current = playAlarm; }, [playAlarm]);
-  React.useEffect(() => { autoAnsweredCountRef.current = autoAnsweredCount; }, [autoAnsweredCount]);
-  React.useEffect(() => { skippedCountRef.current = skippedCount; }, [skippedCount]);
-  React.useEffect(() => { setAutoAnsweredCountRef.current = setAutoAnsweredCount; }, [setAutoAnsweredCount]);
-  React.useEffect(() => { setSkippedCountRef.current = setSkippedCount; }, [setSkippedCount]);
 
   const triggerAlarmRef = React.useRef(async () => {
     const now = Date.now();
@@ -117,10 +107,8 @@ export function useTimerStateMachine(
         if (settings.auto.autoAnswerAction === 'skip') {
           await pluginRef.current.queue.removeCurrentCardFromQueue(false);
           pluginRef.current.app.toast('Card Skipped.');
-          setSkippedCountRef.current(skippedCountRef.current + 1);
         } else {
           await pluginRef.current.queue.rateCurrentCard(QueueInteractionScore.AGAIN);
-          setAutoAnsweredCountRef.current(autoAnsweredCountRef.current + 1);
         }
       }, answerDelay));
     }
@@ -134,7 +122,6 @@ export function useTimerStateMachine(
     settings.auto.autoShowAnswerEnabled, settings.auto.additiveShowAnswerDelaySec,
     settings.auto.additiveAutoAnswerDelaySec, settings.auto.autoAnswerAction,
     settings.alarm.repeatIntervalSec
-    // Note: *CountRef refs are intentionally excluded — they're updated via separate useEffects
   ]);
 
   return { startTime, visualAlarmUntil };

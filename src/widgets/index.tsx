@@ -23,14 +23,8 @@ import {
   DEFAULT_AUTO_ANSWER_ACTION,
   DEFAULT_ADDITIVE_AUTO_ANSWER_DELAY,
   ENABLE_VISUAL_FLASH_KEY,
-  ALARM_FLASH_COLOR_KEY,
-  PROGRESS_BAR_COLOR_KEY,
-  ENABLE_SESSION_SUMMARY_KEY,
   ENABLE_TAG_OVERRIDES_KEY,
   DEFAULT_ENABLE_VISUAL_FLASH,
-  DEFAULT_ALARM_FLASH_COLOR,
-  DEFAULT_PROGRESS_BAR_COLOR,
-  DEFAULT_ENABLE_SESSION_SUMMARY,
   DEFAULT_ENABLE_TAG_OVERRIDES,
 } from '../lib/constants';
 
@@ -118,27 +112,6 @@ async function onActivate(plugin: ReactRNPlugin) {
     title: 'Enable Visual Screen Flash',
     description: 'Flashes the entire screen border/overlay when the alarm triggers. Great for silent study.',
     defaultValue: DEFAULT_ENABLE_VISUAL_FLASH,
-  });
-
-  await plugin.settings.registerStringSetting({
-    id: ALARM_FLASH_COLOR_KEY,
-    title: 'Alarm Flash Color',
-    description: 'CSS color (Hex or name) for the screen flash. Default: #f59e0b (Amber)',
-    defaultValue: DEFAULT_ALARM_FLASH_COLOR,
-  });
-
-  await plugin.settings.registerStringSetting({
-    id: PROGRESS_BAR_COLOR_KEY,
-    title: 'Custom Progress Bar Color',
-    description: 'CSS color (Hex or name) for the progress bar. Leave empty to use theme defaults.',
-    defaultValue: DEFAULT_PROGRESS_BAR_COLOR,
-  });
-
-  await plugin.settings.registerBooleanSetting({
-    id: ENABLE_SESSION_SUMMARY_KEY,
-    title: 'Show Session Summary',
-    description: 'Automatically show a performance summary (Answered vs Skipped) when you finish a queue session.',
-    defaultValue: DEFAULT_ENABLE_SESSION_SUMMARY,
   });
 
   await plugin.settings.registerBooleanSetting({

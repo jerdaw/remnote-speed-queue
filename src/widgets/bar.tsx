@@ -8,7 +8,6 @@ import { useAutoDetectDelay } from '../lib/hooks/useAutoDetectDelay';
 import { useAlarmAudio } from '../lib/hooks/useAlarmAudio';
 import { useTimerStateMachine } from '../lib/hooks/useTimerStateMachine';
 import { useTheme } from '../lib/hooks/useTheme';
-import { useSessionSummary } from '../lib/hooks/useSessionSummary';
 
 export function Bar() {
   const settings = useQueueSettings();
@@ -20,7 +19,6 @@ export function Bar() {
     settings.timer.initialDelaySec,
     settings.advanced.enableTagOverrides
   );
-  useSessionSummary(cardId, settings.advanced.enableSessionSummary);
   const { playAlarm } = useAlarmAudio(settings.alarm);
   const { startTime, visualAlarmUntil } = useTimerStateMachine(
     cardId,
@@ -55,13 +53,11 @@ export function Bar() {
       : 0
   );
 
-  const barColor = settings.advanced.progressBarColor
-    ? settings.advanced.progressBarColor
-    : isDark
-      ? 'var(--rn-clr-content-accent, #3b82f6)' // Bright blue in dark mode
-      : 'var(--rn-clr-content-accent, #2563eb)'; // Strong blue in light mode
+  const barColor = isDark
+    ? 'var(--rn-clr-content-accent, #3b82f6)' // Bright blue in dark mode
+    : 'var(--rn-clr-content-accent, #2563eb)'; // Strong blue in light mode
 
-  const flashColor = settings.advanced.alarmFlashColor;
+  const flashColor = 'var(--rn-clr-background-orange, #f59e0b)';
 
   return (
     <>
@@ -76,10 +72,9 @@ export function Bar() {
             bottom: 0,
             pointerEvents: 'none',
             zIndex: 9999,
-            border: `12px solid ${flashColor}`,
-            boxShadow: `inset 0 0 100px ${flashColor}`,
-            backgroundColor: `${flashColor}1A`, // 10% opacity
-            animation: 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            border: `2px solid ${flashColor}`,
+            backgroundColor: 'transparent',
+            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
           }}
         />
       )}

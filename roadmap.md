@@ -18,10 +18,8 @@ Strategic goals and planned technical improvements for the RemNote Speed Queue p
 
 ## Phase 3: Advanced Optimization (Completed)
 
-- [x] **Visual Feedback**: Subtle full-screen flash/overlay for silent focus.
-- [x] **Session Stats**: Performance summary (Answered vs Skipped) toast on queue exit.
+- [x] **Visual Feedback**: Minimal screen flash/overlay for silent focus.
 - [x] **Per-Document Settings**: Tag-based speed overrides using `#Speed:X`.
-- [x] **Color Customization**: Configurable progress bar and alarm flash colors.
 
 ## Phase 4: Adaptive Intelligence (Planned)
 
