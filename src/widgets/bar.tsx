@@ -8,6 +8,7 @@ import { useAutoDetectDelay } from '../lib/hooks/useAutoDetectDelay';
 import { useAlarmAudio } from '../lib/hooks/useAlarmAudio';
 import { useTimerStateMachine } from '../lib/hooks/useTimerStateMachine';
 import { useTheme } from '../lib/hooks/useTheme';
+import { useSessionSummary } from '../lib/hooks/useSessionSummary';
 
 export function Bar() {
   const settings = useQueueSettings();
@@ -16,8 +17,10 @@ export function Bar() {
   const delayState = useAutoDetectDelay(
     cardId,
     settings.timer.readingSpeed,
-    settings.timer.initialDelaySec
+    settings.timer.initialDelaySec,
+    settings.advanced.enableTagOverrides
   );
+  useSessionSummary(cardId, settings.advanced.enableSessionSummary);
   const { playAlarm } = useAlarmAudio(settings.alarm);
   const { startTime, visualAlarmUntil } = useTimerStateMachine(
     cardId,
@@ -52,30 +55,57 @@ export function Bar() {
       : 0
   );
 
+  const barColor = settings.advanced.progressBarColor
+    ? settings.advanced.progressBarColor
+    : isDark
+      ? 'var(--rn-clr-content-accent, #3b82f6)' // Bright blue in dark mode
+      : 'var(--rn-clr-content-accent, #2563eb)'; // Strong blue in light mode
+
+  const flashColor = settings.advanced.alarmFlashColor;
+
   return (
-    <div className="w-[100%]">
-      {settings.display.enableProgressBar && (
+    <>
+      {/* Screen Flash Overlay */}
+      {settings.advanced.enableVisualFlash && visualAlarmActive && (
         <div
-          className={clsx((width === 100 || visualAlarmActive) && alarmDelayMs > 0 && 'animate-pulse')}
           style={{
-            height: visualAlarmActive ? '4px' : '2px',
-            backgroundColor: visualAlarmActive
-              ? 'var(--rn-clr-background-orange, #f59e0b)'
-              : isDark
-                ? 'var(--rn-clr-content-accent, #3b82f6)' // Bright blue in dark mode
-                : 'var(--rn-clr-content-accent, #2563eb)', // Strong blue in light mode
-            boxShadow: visualAlarmActive
-              ? '0 0 10px rgba(245, 158, 11, 0.6)'
-              : isDark
-                ? '0 0 4px rgba(59, 130, 246, 0.3)'
-                : 'none',
-            opacity: visualAlarmActive ? 1 : 0.7,
-            width: visualAlarmActive ? '100%' : `${width}%`,
-            transition: 'height 120ms ease, opacity 120ms ease, background-color 200ms ease',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            pointerEvents: 'none',
+            zIndex: 9999,
+            border: `12px solid ${flashColor}`,
+            boxShadow: `inset 0 0 100px ${flashColor}`,
+            backgroundColor: `${flashColor}1A`, // 10% opacity
+            animation: 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
           }}
-        ></div>
+        />
       )}
-    </div>
+
+      <div className="w-[100%]">
+        {settings.display.enableProgressBar && (
+          <div
+            className={clsx((width === 100 || visualAlarmActive) && alarmDelayMs > 0 && 'animate-pulse')}
+            style={{
+              height: visualAlarmActive ? '4px' : '2px',
+              backgroundColor: visualAlarmActive
+                ? flashColor
+                : barColor,
+              boxShadow: visualAlarmActive
+                ? `0 0 10px ${flashColor}`
+                : isDark
+                  ? `0 0 4px ${barColor}4D` // 30% opacity
+                  : 'none',
+              opacity: visualAlarmActive ? 1 : 0.7,
+              width: visualAlarmActive ? '100%' : `${width}%`,
+              transition: 'height 120ms ease, opacity 120ms ease, background-color 200ms ease',
+            }}
+          ></div>
+        )}
+      </div>
+    </>
   );
 }
 

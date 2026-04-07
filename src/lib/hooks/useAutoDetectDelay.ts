@@ -21,7 +21,8 @@ export interface AutoDetectDelayState {
 export function useAutoDetectDelay(
   cardId: string | null,
   readingSpeed: number,
-  initialDelaySec: number
+  initialDelaySec: number,
+  enableTagOverrides: boolean
 ): AutoDetectDelayState {
   const plugin = usePlugin();
   const [state, setState] = useState<AutoDetectDelayState>({
@@ -87,6 +88,26 @@ export function useAutoDetectDelay(
           return;
         }
 
+        // --- Tag-based Reading Speed Override (Phase 3) ---
+        let effectiveReadingSpeed = readingSpeed;
+        if (enableTagOverrides) {
+          const tags = await associatedRem.ancestorTagRem();
+          for (const tag of tags) {
+            if (tag.text) {
+              const tagText = await plugin.richText.toString(tag.text);
+              // Match "Speed:1.5" or "Speed: 1.5" or "#Speed:1.5"
+              const match = tagText.match(/Speed:\s*(\d+(\.\d+)?)/i);
+              if (match) {
+                const overrideVal = parseFloat(match[1]);
+                if (!isNaN(overrideVal) && overrideVal > 0) {
+                  effectiveReadingSpeed = overrideVal;
+                  break; // Use the first matching tag we find
+                }
+              }
+            }
+          }
+        }
+
         let frontPlainText = '';
         let backPlainText = '';
 
@@ -103,11 +124,17 @@ export function useAutoDetectDelay(
         const { remWordCount, finalDelay } = calculateAutoDetectDelayFromText(
           frontPlainText,
           backPlainText,
-          readingSpeed
+          effectiveReadingSpeed
         );
 
+        if (effectiveReadingSpeed !== readingSpeed) {
+          console.log(
+            `[${COMPONENT_NAME}] Override Detected! Card: ${cardId} — Speed: ${effectiveReadingSpeed}x (Original: ${readingSpeed}x)`
+          );
+        }
+
         console.log(
-          `[${COMPONENT_NAME}] AutoDetect: ${cardId} — remWords=${remWordCount} speed=${readingSpeed}x → ${finalDelay}s`
+          `[${COMPONENT_NAME}] AutoDetect: ${cardId} — remWords=${remWordCount} speed=${effectiveReadingSpeed}x → ${finalDelay}s`
         );
 
         if (!cancelled) {
@@ -134,7 +161,7 @@ export function useAutoDetectDelay(
     return () => {
       cancelled = true;
     };
-  }, [cardId, readingSpeed, initialDelaySec, plugin]);
+  }, [cardId, readingSpeed, initialDelaySec, enableTagOverrides, plugin]);
 
   return state;
 }

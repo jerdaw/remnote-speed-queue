@@ -16,16 +16,18 @@ Strategic goals and planned technical improvements for the RemNote Speed Queue p
 - [x] **Theme Intelligence**: Theme-aware progress bar (Dark/Light detection).
 - [x] **Mobile Parity**: Audio context priming for mobile audio reliability.
 
-## Phase 3: Advanced Optimization (Current)
+## Phase 3: Advanced Optimization (Completed)
 
-- [ ] **Visual Feedback**: Subtly flash the screen or border when the alarm triggers for silent focus.
-- [ ] **Session Stats**: Provide a "Speed Summary" at the end of a queue session.
-- [ ] **Per-Document Settings**: Research allowing different reading speeds for specific folders.
-- [ ] **Color Customization**: Allow users to pick their own progress bar colors in settings.
+- [x] **Visual Feedback**: Subtle full-screen flash/overlay for silent focus.
+- [x] **Session Stats**: Performance summary (Answered vs Skipped) toast on queue exit.
+- [x] **Per-Document Settings**: Tag-based speed overrides using `#Speed:X`.
+- [x] **Color Customization**: Configurable progress bar and alarm flash colors.
 
-- [ ] **Per-Document Settings**: Allow different reading speeds for different folders or documents.
-- [ ] **Session Stats**: Provide a "Speed Summary" at the end of a queue session.
-- [ ] **Visual Feedback**: Subly flash the screen or border when the alarm triggers for silent focus.
+## Phase 4: Adaptive Intelligence (Planned)
+
+- [ ] **Adaptive Learning**: Automatically adjust `Reading Speed` based on recent skip/answer ratios.
+- [ ] **Multi-Sound Library**: Allow choosing between different alarm tones.
+- [ ] **Hotkey Overrides**: Temporary speed adjustments via hotkeys during a session.
 
 ---
 
