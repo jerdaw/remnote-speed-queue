@@ -89,7 +89,6 @@ async function primeAlarmAudioContext() {
     }
     
     sharedAlarmAudioState.isPrimed = true;
-    console.log('EnhancedSpeedQueue: Audio context primed successfully.');
   } catch (error) {
     console.warn('EnhancedSpeedQueue: Failed to prime audio context.', error);
   }

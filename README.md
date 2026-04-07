@@ -41,7 +41,7 @@ Settings are located in `Settings > Plugins > Enhanced Speed Queue`.
 | **Auto** | **Reveal Delay (sec after alarm)** | Extra delay between the alarm and answer reveal. | `3` |
 | **Auto** | **Auto Rate / Skip Card** | Off / Again / Skip Card. | `Again` |
 | **Auto** | **Auto Rate Delay (sec after reveal)** | Extra delay between answer reveal and auto rate/skip. | `2` |
-| **Display** | **Show Progress Bar** | Show the timer bar above the card; it also flashes on alarm. | ✅ On |
+| **Display** | **Show Progress Bar** | Show the theme-aware timer bar above the card; it also flashes on alarm. | ✅ On |
 
 ## Architecture Overview
 
@@ -54,7 +54,7 @@ The plugin is built with a composition-of-hooks pattern to ensure high-frequency
 - `useCardTracker.ts`: Listens for RemNote events to reset state when the card ID changes.
 
 ### View Layer
-- `bar.tsx`: A lightweight widget (`QueueBelowTopBar`) using `requestAnimationFrame` to draw the progress bar at 60fps without overhead.
+- **`bar.tsx`**: A lightweight widget (`QueueBelowTopBar`) using `requestAnimationFrame` to draw the progress bar at 60fps. It features a theme-aware color system (Bright Blue in Dark Mode, Deep Blue in Light Mode) with smooth 120ms CSS transitions for theme switches.
 
 ## Development Setup
 

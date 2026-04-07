@@ -71,7 +71,7 @@ export function Bar() {
                 : 'none',
             opacity: visualAlarmActive ? 1 : 0.7,
             width: visualAlarmActive ? '100%' : `${width}%`,
-            transition: 'height 120ms ease, opacity 120ms ease, width 120ms linear, background-color 200ms ease',
+            transition: 'height 120ms ease, opacity 120ms ease, background-color 200ms ease',
           }}
         ></div>
       )}
